@@ -137,7 +137,7 @@ const CreoVio = {
     // Clear state (e.g. for new project)
     reset() {
         localStorage.removeItem(this.STORAGE_KEY);
-        window.location.href = '/dashboard';
+        window.location.href = 'dashboard.html';
     }
 };
 
