@@ -254,7 +254,7 @@
                     CreoVio.updateUI();
                 }
 
-                const res = await fetch('/api/projects');
+                const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/api/projects');
                 const projects = await res.json();
                 renderProjects(projects);
             } catch (e) {

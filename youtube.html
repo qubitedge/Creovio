@@ -463,7 +463,7 @@
         // Connection Status Check
         async function checkYTStatus() {
             try {
-                const res = await fetch('/yt-status');
+                const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/yt-status');
                 const data = await res.json();
                 const statusBox = document.getElementById('ytStatusBox');
                 const signinBtn = document.getElementById('signinBtn');
@@ -543,7 +543,7 @@
             formData.append('file', file);
 
             try {
-                const res = await fetch('/upload-thumbnail', {
+                const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/upload-thumbnail', {
                     method: 'POST',
                     body: formData
                 });
@@ -574,7 +574,7 @@
             btn.innerHTML = '<div style="width:20px; height:20px; border:2px solid red; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div> Publishing...';
             
             try {
-                const res = await fetch('/upload-youtube', {
+                const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/upload-youtube', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

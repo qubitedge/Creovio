@@ -230,7 +230,7 @@
                 formData.append('file', file);
 
                 try {
-                    const res = await fetch('/upload-avatar', {
+                    const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/upload-avatar', {
                         method: 'POST',
                         body: formData
                     });

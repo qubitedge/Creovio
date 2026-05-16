@@ -220,7 +220,7 @@
                 btn.innerHTML = '<i class="animate-spin w-5 h-5 border-2 border-white/20 border-t-white rounded-full"></i> Processing...';
                 
                 try {
-                    const res = await fetch('/refine/', {
+                    const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/refine/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ text: input.value })
