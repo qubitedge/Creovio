@@ -231,7 +231,7 @@
                 formData.append('file', file);
 
                 try {
-                    const res = await fetch('`" + window.API_URL + `"/upload-avatar', {
+                    const res = await fetch(`${window.API_URL}/upload-avatar`, {
                         method: 'POST',
                         body: formData
                     });

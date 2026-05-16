@@ -3,7 +3,7 @@
    Step 1: Voice | Step 2: Video | Step 3: YouTube
    ========================================================= */
 
-const API = "`" + window.API_URL + `"";
+const API = window.API_URL;
 
 // State management
 let currentAudioUrl = null;

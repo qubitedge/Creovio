@@ -929,7 +929,7 @@
 
             try {
                 log.innerText = "INITIALIZING PIPELINE...";
-                const res = await fetch('`" + window.API_URL + `"/generate-video/', {
+                const res = await fetch(`${window.API_URL}/generate-video/`, {
                     method: 'POST',
                     body: formData
                 });
@@ -987,7 +987,7 @@
             if (!wsWorking) {
                 const poll = setInterval(async () => {
                     try {
-                        const res  = await fetch(``" + window.API_URL + `"/jobs/${jobId}/status`);
+                        const res  = await fetch(`${window.API_URL}/jobs/${jobId}/status`);
                         const data = await res.json();
                         const fakeP = Math.min(95, (Date.now() - startTs) / 1000 / 1.5);
                         pFill.style.width = fakeP + '%';
@@ -1035,7 +1035,7 @@
         }
 
         async function fetchAndFinish(jobId) {
-            const res  = await fetch(``" + window.API_URL + `"/jobs/${jobId}/status`);
+            const res  = await fetch(`${window.API_URL}/jobs/${jobId}/status`);
             const data = await res.json();
             CreoVio.updateState({
                 videoUrl: data.video_path?.startsWith('/') ? data.video_path : '/' + data.video_path,
@@ -1117,7 +1117,7 @@
                 formData.append('file', file);
                 
                 try {
-                    const res = await fetch('`" + window.API_URL + `"/upload-audio/', { method: 'POST', body: formData });
+                    const res = await fetch(`${window.API_URL}/upload-audio/`, { method: 'POST', body: formData });
                     const data = await res.json();
                     
                     // Update state with the NEW job and audio URL
