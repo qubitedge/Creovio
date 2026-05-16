@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Presenter - CreoVio Studio</title>
@@ -928,7 +929,7 @@
 
             try {
                 log.innerText = "INITIALIZING PIPELINE...";
-                const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/generate-video/', {
+                const res = await fetch('`" + window.API_URL + `"/generate-video/', {
                     method: 'POST',
                     body: formData
                 });
@@ -960,7 +961,7 @@
             // Try WebSocket first for real-time updates
             let wsWorking = false;
             try {
-                const ws = new WebSocket(`wss://peoples-but-runtime-kept.trycloudflare.com/ws/jobs`);
+                const ws = new WebSocket(`${window.API_URL.replace("https://", "wss://").replace("http://", "ws://")}/ws/jobs`);
                 ws.onopen = () => { wsWorking = true; };
                 ws.onmessage = (evt) => {
                     const d = JSON.parse(evt.data);
@@ -986,7 +987,7 @@
             if (!wsWorking) {
                 const poll = setInterval(async () => {
                     try {
-                        const res  = await fetch(`https://peoples-but-runtime-kept.trycloudflare.com/jobs/${jobId}/status`);
+                        const res  = await fetch(``" + window.API_URL + `"/jobs/${jobId}/status`);
                         const data = await res.json();
                         const fakeP = Math.min(95, (Date.now() - startTs) / 1000 / 1.5);
                         pFill.style.width = fakeP + '%';
@@ -1034,7 +1035,7 @@
         }
 
         async function fetchAndFinish(jobId) {
-            const res  = await fetch(`https://peoples-but-runtime-kept.trycloudflare.com/jobs/${jobId}/status`);
+            const res  = await fetch(``" + window.API_URL + `"/jobs/${jobId}/status`);
             const data = await res.json();
             CreoVio.updateState({
                 videoUrl: data.video_path?.startsWith('/') ? data.video_path : '/' + data.video_path,
@@ -1116,7 +1117,7 @@
                 formData.append('file', file);
                 
                 try {
-                    const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/upload-audio/', { method: 'POST', body: formData });
+                    const res = await fetch('`" + window.API_URL + `"/upload-audio/', { method: 'POST', body: formData });
                     const data = await res.json();
                     
                     // Update state with the NEW job and audio URL

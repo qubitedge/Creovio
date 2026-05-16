@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Lecture Library | CreoVio AI</title>
@@ -254,7 +255,7 @@
                     CreoVio.updateUI();
                 }
 
-                const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/api/projects');
+                const res = await fetch('`" + window.API_URL + `"/api/projects');
                 const projects = await res.json();
                 renderProjects(projects);
             } catch (e) {

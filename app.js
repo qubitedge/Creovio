@@ -3,7 +3,7 @@
    Step 1: Voice | Step 2: Video | Step 3: YouTube
    ========================================================= */
 
-const API = "https://peoples-but-runtime-kept.trycloudflare.com";
+const API = "`" + window.API_URL + `"";
 
 // State management
 let currentAudioUrl = null;
@@ -133,7 +133,7 @@ document.getElementById("generateVideoBtn")?.addEventListener("click", async () 
             progress += (98 - progress) * 0.05;
             progressBar.style.width = `${progress}%`;
         }, 1000);
-        const ws = new WebSocket(`wss://peoples-but-runtime-kept.trycloudflare.com/ws/jobs`);
+        const ws = new WebSocket(`${window.API_URL.replace("https://", "wss://").replace("http://", "ws://")}/ws/jobs`);
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             if (data.job_id === currentJobId && data.status === "VIDEO_DONE") {

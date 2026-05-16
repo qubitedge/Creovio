@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile | CreoVio AI</title>
@@ -230,7 +231,7 @@
                 formData.append('file', file);
 
                 try {
-                    const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/upload-avatar', {
+                    const res = await fetch('`" + window.API_URL + `"/upload-avatar', {
                         method: 'POST',
                         body: formData
                     });

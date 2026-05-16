@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CreoVio - Creative Studio</title>
@@ -220,7 +221,7 @@
                 btn.innerHTML = '<i class="animate-spin w-5 h-5 border-2 border-white/20 border-t-white rounded-full"></i> Processing...';
                 
                 try {
-                    const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/refine/', {
+                    const res = await fetch('`" + window.API_URL + `"/refine/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ text: input.value })
