@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Voice Studio | CreoVio AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-teal: #5BBFBF;
+            --bg-teal-light: #4DB8B8;
+            --text-dark: #002b4d; /* Deep Dark Blue */
+            --glass-white: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --muted-mint: rgba(255, 255, 255, 0.4);
+            --accent-teal: #1a8080;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-teal), var(--bg-teal-light));
+            min-height: 100vh;
+            color: var(--text-dark);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            background: rgba(0, 100, 100, 0.15);
+        }
+        .orb-1 { width: 500px; height: 500px; top: -100px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; bottom: -50px; right: -50px; }
+        .orb-3 { width: 300px; height: 300px; top: 40%; left: 60%; }
+
+        /* Column wrapper to ensure equal height cards */
+        .col-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--text-dark);
+        }
+        .logo span { opacity: 0.6; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 2rem;
+            align-items: stretch;
+        }
+
+        /* Glass Cards */
+        .card {
+            background: var(--glass-white);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 24px rgba(0, 80, 80, 0.12);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+            letter-spacing: -0.02em;
+        }
+
+        /* Script Editor */
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .char-count {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            opacity: 0.8;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.35);
+            border: none;
+            border-radius: 16px;
+            padding: 1.5rem;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+            resize: none;
+            outline: none;
+            margin-bottom: 1.5rem;
+        }
+        textarea::placeholder {
+            color: rgba(26, 58, 58, 0.4);
+        }
+
+        /* Waveform */
+        .waveform {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 1.5rem;
+            padding: 0 1rem;
+        }
+        .wave-bar {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            height: 10%;
+            transition: height 0.4s ease, background 0.4s ease;
+        }
+        .wave-bar.active {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 2rem;
+        }
+        .control-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-teal);
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+
+        /* Advanced Controls UI */
+        .chip-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .chip {
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chip.active {
+            background: var(--text-dark);
+            color: white;
+            border-color: var(--text-dark);
+        }
+
+        /* Voice Library Tabs */
+        .library-tabs {
+            display: flex;
+            gap: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 1.5rem;
+        }
+        .tab {
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+            font-weight: 900;
+            opacity: 0.5;
+            cursor: pointer;
+            position: relative;
+        }
+        .tab.active {
+            opacity: 1;
+        }
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--text-dark);
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .search-box input {
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-weight: 700;
+            outline: none;
+            width: 100%;
+        }
+
+        .voice-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .voice-grid::-webkit-scrollbar {
+            width: 4px;
+        }
+        .voice-item {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .voice-item:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        .voice-item.selected {
+            border-color: var(--text-dark);
+            background: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin: 0 auto 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+        .voice-name {
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        /* Audio Player */
+        .mini-player {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+        }
+        .play-btn {
+            width: 36px;
+            height: 36px;
+            background: var(--accent-teal);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .progress-container {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            position: relative;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #2dd4bf;
+            border-radius: 3px;
+        }
+
+        /* Robot Card */
+        .robot-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            flex: 1; /* Match height */
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Scanning Beam Animation */
+        .scan-beam {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.5), transparent);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.8);
+            z-index: 5;
+            animation: scanning 4s ease-in-out infinite;
+        }
+        @keyframes scanning {
+            0%, 100% { top: 10%; }
+            50% { top: 90%; }
+        }
+        .pulse-ring {
+            position: absolute;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: pulse-ring 4s infinite;
+        }
+        .ring-1 { width: 250px; height: 250px; }
+        .ring-2 { width: 350px; height: 350px; animation-delay: 1s; }
+        .ring-3 { width: 450px; height: 450px; animation-delay: 2s; }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .robot-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.8) contrast(1.1);
+            transition: transform 0.5s ease;
+        }
+        .robot-card:hover .robot-img {
+            transform: scale(1.05);
+        }
+        
+
+        .robot-head {
+            width: 140px;
+            height: 100px;
+            background: #1a3a3a;
+            border-radius: 18px;
+            margin: 0 auto;
+            position: relative;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .robot-eyes {
+            display: flex;
+            justify-content: space-around;
+        }
+        .eye {
+            width: 20px;
+            height: 20px;
+            background: #818cf8;
+            border-radius: 4px;
+            box-shadow: 0 0 15px #818cf8;
+            animation: blink 4s infinite;
+        }
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0); }
+        }
+        .robot-mouth {
+            height: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 5px;
+        }
+        .mouth-bar {
+            width: 6px;
+            height: 6px;
+            background: #4ade80;
+            border-radius: 3px;
+            animation: mouth-wave 0.5s ease-in-out infinite alternate;
+            box-shadow: 0 0 8px #4ade80;
+        }
+        @keyframes mouth-wave {
+            from { height: 6px; }
+            to { height: 18px; }
+        }
+
+        .antenna {
+            width: 6px;
+            height: 30px;
+            background: #1a3a3a;
+            margin: 0 auto;
+            position: relative;
+        }
+        .orb-antenna {
+            width: 10px;
+            height: 10px;
+            background: #4ade80;
+            border-radius: 50%;
+            position: absolute;
+            top: -10px;
+            left: -3px;
+            box-shadow: 0 0 15px #4ade80;
+            animation: orb-pulse 2s infinite;
+        }
+        @keyframes orb-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.6; }
+        }
+
+        .robot-torso {
+            width: 180px;
+            height: 120px;
+            background: #1a3a3a;
+            border-radius: 20px;
+            margin: 8px auto;
+            position: relative;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px;
+        }
+        .grill {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            height: 7px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            width: 60%;
+            margin: 0 auto;
+        }
+        .status-light {
+            width: 12px;
+            height: 12px;
+            background: #4ade80;
+            border-radius: 50%;
+            margin: 0 auto;
+            box-shadow: 0 0 10px #4ade80;
+        }
+        .status-light {
+            position: absolute;
+            bottom: 12px;
+            right: 18px;
+            animation: status-blink 1s infinite;
+        }
+        @keyframes status-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .arm {
+            width: 15px;
+            height: 40px;
+            background: #1a3a3a;
+            position: absolute;
+            top: 20px;
+            border-radius: 8px;
+        }
+        .arm-l { left: -5px; }
+        .arm-r { right: -5px; }
+
+        .status-line {
+            margin-top: 1.5rem;
+            display: flex;
+            items-center: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #4ade80;
+            transition: all 0.3s ease;
+        }
+        .status-dot.processing {
+            background: #818cf8;
+            box-shadow: 0 0 15px #818cf8;
+            animation: pulse-dot 1s infinite;
+        }
+        @keyframes pulse-dot {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Clone Card */
+        .clone-card {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .input-group label {
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+        input[type="text"] {
+            background: rgba(255, 255, 255, 0.35);
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: var(--text-dark);
+            font-weight: 600;
+            outline: none;
+        }
+        .upload-zone {
+            height: 120px;
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            items-center: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .upload-zone:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .upload-zone i { opacity: 0.5; }
+        .upload-text { font-size: 0.85rem; font-weight: 700; opacity: 0.7; }
+
+        .btn-generate {
+            width: 100%;
+            background: white;
+            color: #1a4040;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        .btn-generate:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+        .btn-generate:active {
+            transform: translateY(0) scale(0.98);
+        }
+        .btn-generate::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: skewX(-20deg);
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 100;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">Creo<span>Vio</span></div>
+            <div style="display: flex; gap: 2rem; align-items: center;">
+                <a href="/projects" style="color: var(--text-dark); font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; opacity: 0.8; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+                    <i data-lucide="folder" style="width: 18px;"></i> My Projects
+                </a>
+                <a href="/dashboard" style="color: var(--text-dark); font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="arrow-left" style="width: 18px;"></i> Dashboard
+                </a>
+            </div>
+        </header>
+
+        <div class="main-grid">
+            <!-- Left Column -->
+            <div class="col-wrapper">
+                
+                <!-- Script Editor -->
+                <div class="card">
+                    <div class="editor-header">
+                        <h2>Script Editor</h2>
+                        <div class="char-count"><span id="charNow">0</span> / 2000</div>
+                    </div>
+                    <textarea id="scriptText" placeholder="Enter your lecture text or script here..."></textarea>
+                    
+                    <div class="waveform" id="waveform">
+                        <!-- 40 bars will be injected here -->
+                    </div>
+
+                    <div class="controls" style="flex-direction: column; gap: 1.5rem;">
+                        <div class="control-group">
+                            <div class="control-label">Voice Speed <span id="speedVal" style="color: var(--accent-teal)">1.0x</span></div>
+                            <div class="chip-group" id="speedChips">
+                                <div class="chip" onclick="setSpeed(0.8, this)">Slow</div>
+                                <div class="chip active" onclick="setSpeed(1.0, this)">Normal</div>
+                                <div class="chip" onclick="setSpeed(1.2, this)">Fast</div>
+                                <div class="chip" onclick="setSpeed(1.5, this)">Turbo</div>
+                                <div class="chip" onclick="toggleAdvanced('speed')">Custom...</div>
+                            </div>
+                            <input type="range" id="speedRange" min="0.5" max="2.0" step="0.1" value="1.0" style="display: none; margin-top: 10px;">
+                        </div>
+
+                        <div class="control-group">
+                            <div class="control-label">Pitch Profile <span id="pitchVal" style="color: var(--accent-teal)">1.0</span></div>
+                            <div class="chip-group" id="pitchChips">
+                                <div class="chip" onclick="setPitch(0.7, this)">Deep</div>
+                                <div class="chip active" onclick="setPitch(1.0, this)">Natural</div>
+                                <div class="chip" onclick="setPitch(1.3, this)">Soft</div>
+                                <div class="chip" onclick="setPitch(1.6, this)">High</div>
+                                <div class="chip" onclick="toggleAdvanced('pitch')">Custom...</div>
+                            </div>
+                            <input type="range" id="pitchRange" min="0.5" max="2.0" step="0.1" value="1.0" style="display: none; margin-top: 10px;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Neural Voice Selection -->
+                <div class="card" style="padding-bottom: 2rem;">
+                    <div class="editor-header">
+                        <h2>Voice Library</h2>
+                        <div style="font-size: 0.75rem; font-weight: 900; color: var(--text-dark); background: rgba(255,255,255,0.4); padding: 6px 14px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.5);" onclick="fetchVoices()">
+                            <i data-lucide="refresh-cw" class="w-3 h-3 inline-block mr-1"></i> Sync Voices
+                        </div>
+                    </div>
+
+                    <div class="library-tabs">
+                        <div class="tab active" onclick="switchTab('featured', this)">Featured</div>
+                        <div class="tab" onclick="switchTab('all', this)">Browse All</div>
+                        <div class="tab" onclick="switchTab('custom', this)">My Clones</div>
+                    </div>
+
+                    <div class="search-box" id="searchBox" style="display: none;">
+                        <i data-lucide="search" style="width: 16px; opacity: 0.5;"></i>
+                        <input type="text" id="voiceSearch" placeholder="Search voices..." oninput="filterVoices()">
+                    </div>
+                    
+                    <div class="voice-grid" id="voiceGrid">
+                        <!-- Dynamic voices -->
+                    </div>
+
+                    <div class="mini-player" style="margin-top: 1.5rem; border: 1px solid rgba(255,255,255,0.2);">
+                        <audio id="realAudio" src=""></audio>
+                        <button class="play-btn" onclick="togglePlay()">
+                            <i data-lucide="play" id="playIcon" style="fill: white; width: 14px;"></i>
+                        </button>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                        <div id="playerTime" style="font-size: 0.7rem; font-weight: 900; opacity: 0.5;">0:00 / 0:00</div>
+                    </div>
+
+                    <!-- Moved Synthesis Button -->
+                    <div style="margin-top: 2rem;">
+                        <button class="btn-generate" onclick="synthesizeScript()" style="background: var(--text-dark); color: white; border-radius: 16px;">
+                            <span style="display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+                                <i data-lucide="sparkles" style="width: 18px;"></i> Synthesize Voice
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-wrapper">
+                
+                <!-- Robot Card -->
+                <div class="card robot-card">
+                    <div class="scan-beam"></div>
+                    <div class="pulse-ring ring-1"></div>
+                    <div class="pulse-ring ring-2"></div>
+                    <div class="pulse-ring ring-3"></div>
+
+
+                    <img src="/static/voice_lab.jpg" class="robot-img" alt="Voice Generation Lab">
+
+                    <div class="status-line">
+                        <div class="status-dot"></div>
+                        <span id="robotStatus">Ready to synthesize</span>
+                    </div>
+                </div>
+
+                <!-- Clone Card -->
+                <div class="card clone-card">
+                    <h2>Clone Your Voice</h2>
+                    <div class="input-group">
+                        <label>Profile Name</label>
+                        <input type="text" placeholder="e.g. My Studio Voice">
+                    </div>
+                    <div class="upload-zone" onclick="simulateUpload()">
+                        <i data-lucide="upload-cloud"></i>
+                        <span class="upload-text" id="uploadStatus">Drop your 1-min audio here</span>
+                    </div>
+                    <button class="btn-generate" id="generateBtn" onclick="startGeneration()">
+                        Generate Voice Profile
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Lucide Icons
+        lucide.createIcons();
+
+        // Waveform Animation
+        const waveform = document.getElementById('waveform');
+        for (let i = 0; i < 40; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'wave-bar';
+            waveform.appendChild(bar);
+        }
+
+        const bars = document.querySelectorAll('.wave-bar');
+        setInterval(() => {
+            bars.forEach(bar => {
+                const height = Math.random() * 80 + 10;
+                bar.style.height = height + '%';
+                if (height > 60) {
+                    bar.classList.add('active');
+                } else {
+                    bar.classList.remove('active');
+                }
+            });
+        }, 400);
+
+        // Character Counter
+        const textarea = document.getElementById('scriptText');
+        const charNow = document.getElementById('charNow');
+        textarea.addEventListener('input', () => {
+            charNow.innerText = textarea.value.length;
+        });
+
+        // Sliders
+        const speedRange = document.getElementById('speedRange');
+        const speedVal = document.getElementById('speedVal');
+        speedRange.addEventListener('input', () => {
+            speedVal.innerText = speedRange.value + 'x';
+        });
+
+        const pitchRange = document.getElementById('pitchRange');
+        const pitchVal = document.getElementById('pitchVal');
+        pitchRange.addEventListener('input', () => {
+            pitchVal.innerText = pitchRange.value;
+        });
+
+        // Global State
+        let selectedVoiceId = "en-IN-NeerjaNeural";
+        let uploadedFile = null;
+        let allVoices = [];
+        let currentTab = 'featured';
+
+        // Advanced Controls Logic
+        function setSpeed(val, el) {
+            document.querySelectorAll('#speedChips .chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('speedRange').value = val;
+            document.getElementById('speedVal').innerText = val + 'x';
+            document.getElementById('speedRange').style.display = 'none';
+        }
+
+        function setPitch(val, el) {
+            document.querySelectorAll('#pitchChips .chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('pitchRange').value = val;
+            document.getElementById('pitchVal').innerText = val;
+            document.getElementById('pitchRange').style.display = 'none';
+        }
+
+        function toggleAdvanced(type) {
+            const el = document.getElementById(type + 'Range');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        document.getElementById('speedRange').oninput = (e) => {
+            document.getElementById('speedVal').innerText = e.target.value + 'x';
+        };
+        document.getElementById('pitchRange').oninput = (e) => {
+            document.getElementById('pitchVal').innerText = e.target.value;
+        };
+
+        // Voice Library Tabs
+        function switchTab(tab, el) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('searchBox').style.display = tab === 'all' ? 'flex' : 'none';
+            renderVoices();
+        }
+
+        async function fetchVoices() {
+            try {
+                const response = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/voices/');
+                allVoices = await response.json();
+                renderVoices();
+            } catch (err) {
+                console.error("Failed to fetch voices:", err);
+            }
+        }
+
+        function renderVoices() {
+            const grid = document.getElementById('voiceGrid');
+            const search = document.getElementById('voiceSearch').value.toLowerCase();
+            grid.innerHTML = ''; 
+
+            let filtered = allVoices;
+            if (currentTab === 'featured') {
+                const featuredNames = ['Neerja', 'Prabhat', 'Swara', 'Shruti'];
+                filtered = allVoices.filter(v => featuredNames.some(f => v.name.includes(f)));
+            } else if (currentTab === 'custom') {
+                filtered = allVoices.filter(v => v.id.includes('custom'));
+            }
+
+            if (search) {
+                filtered = filtered.filter(v => v.name.toLowerCase().includes(search));
+            }
+
+            filtered.forEach((voice, index) => {
+                let initials = voice.name.substring(0, 2).toUpperCase();
+                let color = '#1a8080';
+                if(voice.name.includes('Neerja')) color = '#e879a0';
+                if(voice.name.includes('Prabhat')) color = '#818cf8';
+                if(voice.name.includes('Swara')) color = '#f59e0b';
+                if(voice.name.includes('Shruti')) color = '#2dd4bf';
+                if(voice.id.includes('custom')) color = '#1a3a3a';
+
+                const isSelected = voice.id === selectedVoiceId;
+                const item = document.createElement('div');
+                item.className = `voice-item ${isSelected ? 'selected' : ''}`;
+                item.onclick = () => selectVoice(item, voice.id, voice.name);
+                item.innerHTML = `
+                    <div class="avatar" style="background: ${color}; box-shadow: 0 4px 12px ${color}44;">${initials}</div>
+                    <div class="voice-name">${voice.name.split(' ')[0]}</div>
+                    ${voice.id.includes('custom') ? '<i data-lucide="star" style="position:absolute; top:8px; right:8px; width:10px; color:#f59e0b; fill:#f59e0b;"></i>' : ''}
+                `;
+                grid.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        function filterVoices() {
+            renderVoices();
+        }
+
+        fetchVoices();
+
+        // Synthesis Flow
+        async function synthesizeScript() {
+            const status = document.getElementById('robotStatus');
+            const script = document.getElementById('scriptText').value;
+            const btn = document.querySelector('button[onclick="synthesizeScript()"]');
+            const speed = parseFloat(document.getElementById('speedRange').value);
+            const pitch = parseFloat(document.getElementById('pitchRange').value);
+            
+            if (!script) {
+                status.innerText = "Please enter some text first";
+                status.style.color = "#ff4d4d";
+                setTimeout(() => { status.innerText = "Ready to synthesize"; status.style.color = ""; }, 2000);
+                return;
+            }
+
+            btn.disabled = true;
+            status.innerText = "Initializing AI Engine (First time may take 60s)...";
+            status.style.color = "var(--text-dark)";
+            document.querySelector('.status-dot').classList.add('processing');
+            
+            const bars = document.querySelectorAll('.mouth-bar');
+            bars.forEach(bar => bar.style.animationDuration = '0.2s');
+
+            try {
+                const response = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/generate_voice/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: script,
+                        voice: selectedVoiceId,
+                        speed: speed,
+                        pitch: pitch
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || "Synthesis failed");
+                }
+                const data = await response.json();
+
+                status.innerText = "Voice synthesis complete!";
+                bars.forEach(bar => bar.style.animationDuration = '0.5s');
+                
+                const audioPlayer = document.getElementById('realAudio');
+                const audioUrl = data.audio_path.startsWith('/') ? data.audio_path : '/' + data.audio_path;
+                audioPlayer.src = audioUrl;
+                audioPlayer.load();
+
+                // Sync with global state for Video Presenter
+                if (typeof CreoVio !== 'undefined') {
+                    CreoVio.updateState({
+                        currentJobId: data.job_id,
+                        audioUrl: audioUrl,
+                        text: script,
+                        status: 'audio_ready'
+                    });
+                }
+                
+                status.innerHTML = `
+                    <span style="color: #059669; font-weight: 900;">✓ Audio Ready!</span>
+                    <a href="/video?audio=${encodeURIComponent(audioUrl)}&job_id=${data.job_id}&text=${encodeURIComponent(script)}" 
+                       style="background: #1a8080; color: white; padding: 6px 16px; border-radius: 50px; margin-left: 15px; text-decoration: none; font-size: 0.85rem; font-weight: 800; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(26, 128, 128, 0.3);">
+                       Next: Video Lab <i data-lucide="arrow-right" style="width: 14px;"></i>
+                    </a>
+                `;
+                lucide.createIcons();
+                document.querySelector('.status-dot').classList.remove('processing');
+
+            } catch (err) {
+                status.innerText = "Error: " + err.message;
+                status.style.color = "#ff4d4d";
+                document.querySelector('.status-dot').classList.remove('processing');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Voice Selection
+        function selectVoice(el, id, name) {
+            selectedVoiceId = id;
+            document.querySelectorAll('.voice-item').forEach(item => item.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('robotStatus').innerText = `Switched to ${name}`;
+        }
+
+        // Audio Player Logic
+        function togglePlay() {
+            const audio = document.getElementById('realAudio');
+            const icon = document.getElementById('playIcon');
+            if (audio.paused) {
+                audio.play();
+                icon.setAttribute('data-lucide', 'pause');
+            } else {
+                audio.pause();
+                icon.setAttribute('data-lucide', 'play');
+            }
+            lucide.createIcons();
+        }
+
+        const audio = document.getElementById('realAudio');
+        audio.ontimeupdate = () => {
+            const progress = document.getElementById('progressBar');
+            const time = document.getElementById('playerTime');
+            const p = (audio.currentTime / audio.duration) * 100;
+            progress.style.width = p + '%';
+            
+            const formatTime = (s) => new Date(s * 1000).toISOString().substr(14, 5);
+            time.innerText = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration || 0)}`;
+        };
+
+        // Real Upload
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'audio/*';
+        fileInput.onchange = (e) => {
+            uploadedFile = e.target.files[0];
+            document.getElementById('uploadStatus').innerText = `${uploadedFile.name} attached`;
+            document.getElementById('uploadStatus').style.color = "#1a8080";
+        };
+
+        function simulateUpload() {
+            fileInput.click();
+        }
+
+        // Real Cloning
+        async function startGeneration() {
+            const btn = document.getElementById('generateBtn');
+            const status = document.getElementById('robotStatus');
+            const nameInput = document.querySelector('input[placeholder="e.g. My Studio Voice"]').value;
+            
+            if (!uploadedFile || !nameInput) {
+                status.innerText = "Missing Profile Name or Audio Sample";
+                status.style.color = "#ff4d4d";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+            status.innerText = "Analyzing vocal patterns...";
+            
+            const formData = new FormData();
+            formData.append('name', nameInput);
+            formData.append('sample', uploadedFile);
+
+            try {
+                const response = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/clone-voice', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || "Synthesis failed");
+                }
+                const data = await response.json();
+
+                status.innerText = "Custom Voice Profile Created!";
+                btn.innerText = "Profile Ready";
+                btn.style.background = "#4ade80";
+                btn.style.color = "white";
+                
+                fetchVoices(); // Refresh list to see custom voice
+                createBurst();
+            } catch (err) {
+                status.innerText = "Cloning Error: " + err.message;
+                status.style.color = "#ff4d4d";
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function createBurst() {
+            const colors = ['#5BBFBF', '#white', '#1a8080', '#4ade80'];
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 8 + 4;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                const btn = document.getElementById('generateBtn');
+                const rect = btn.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                document.body.appendChild(particle);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 10 + 5;
+                let posX = x;
+                let posY = y;
+                let vx = Math.cos(angle) * velocity;
+                let vy = Math.sin(angle) * velocity;
+                let alpha = 1;
+
+                function animate() {
+                    posX += vx;
+                    posY += vy;
+                    vy += 0.2; // gravity
+                    alpha -= 0.02;
+                    particle.style.left = posX + 'px';
+                    particle.style.top = posY + 'px';
+                    particle.style.opacity = alpha;
+                    
+                    if (alpha > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        particle.remove();
+                    }
+                }
+                animate();
+            }
+        }
+    </script>
+</body>
+</html>

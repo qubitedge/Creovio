@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreoVio AI - Studio</title>
+    <!-- Google Fonts: Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .pipeline-container { display: flex; flex-direction: column; gap: 3rem; max-width: 1000px; margin: 0 auto; padding: 2rem 0 5rem; }
+        .step-block { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; transition: var(--transition); position: relative; }
+        .step-block.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(0.5); }
+        .success-banner { background: rgba(52, 211, 153, 0.1); border: 1px solid var(--accent-green); border-radius: var(--radius-sm); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+        .audio-ready-bar { background: rgba(52, 211, 153, 0.05); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <span class="brand-icon" style="color: var(--accent-teal)">smart_toy</span>
+        <h1 style="color: var(--accent-teal)">Creo<span class="brand-ai" style="color: white">Vio</span></h1>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/" class="nav-item">
+            <span class="material-icons-round">home</span>
+            <div><strong>Home</strong><small>Back to Landing</small></div>
+        </a>
+        <div class="nav-divider"></div>
+        <a href="#block-voice" class="nav-item active nav-scroll">
+            <span class="material-icons-round">record_voice_over</span>
+            <div><strong>Step 1</strong><small>Text to Voice</small></div>
+        </a>
+        <a href="#block-video" class="nav-item nav-scroll">
+            <span class="material-icons-round">videocam</span>
+            <div><strong>Step 2</strong><small>Voice to Video</small></div>
+        </a>
+        <a href="#block-publish" class="nav-item nav-scroll">
+            <span class="material-icons-round">cloud_upload</span>
+            <div><strong>Step 3</strong><small>YouTube Upload</small></div>
+        </a>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+
+    <div class="pipeline-container">
+        
+        <!-- STEP 1: TEXT TO VOICE -->
+        <div class="step-block active" id="block-voice">
+            <header class="mb-6">
+                <h2 class="text-2xl font-extrabold">Step 1: Text to Voice</h2>
+                <p class="subtitle">Enter your lecture text and convert it into natural human-like speech</p>
+            </header>
+
+            <div class="card mb-4">
+                <h3 class="mb-2">Enter Your Lecture Text</h3>
+                <p class="helper-text mb-4">Paste your lecture notes, paragraph, or any text below. The system will convert it into natural-sounding human speech.</p>
+                <textarea id="scriptInput" rows="8" placeholder="Paste your text here..."></textarea>
+                <div class="input-footer text-right"><span class="char-count" id="charCount">0 characters</span></div>
+            </div>
+
+            <!-- Custom Voices (Kept but integrated) -->
+            <div class="card mb-4" style="border-color: var(--accent-teal);">
+                <h3 class="mb-2">Custom Voice Profiles</h3>
+                <div class="voice-grid mb-4" id="customVoiceGrid"></div>
+                <div class="voice-cloning-form" style="display:grid; grid-template-columns: 1fr 1fr auto; gap:0.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border); align-items:end;">
+                    <div class="setting-item"><label>Name</label><input type="text" id="customVoiceName" class="text-input" placeholder="e.g. My Voice"></div>
+                    <div class="setting-item"><label>Sample (.wav)</label><input type="file" id="customVoiceFile" accept=".wav"></div>
+                    <button class="btn btn-primary" id="createVoiceBtn">Add Voice</button>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <h3 class="mb-2">Choose a Voice</h3>
+                <p class="helper-text mb-4">Select from 8 human-like neural voices with different accents and genders.</p>
+                <div class="voice-grid" id="voiceGrid">
+                    <label class="voice-option" data-voice="en-US-JennyNeural"><input type="radio" name="voice" value="en-US-JennyNeural" checked><span class="voice-avatar female">J</span><div class="voice-info"><strong>Jenny</strong><small>US Female</small></div></label>
+                    <label class="voice-option" data-voice="en-US-GuyNeural"><input type="radio" name="voice" value="en-US-GuyNeural"><span class="voice-avatar male">G</span><div class="voice-info"><strong>Guy</strong><small>US Male</small></div></label>
+                    <label class="voice-option" data-voice="en-GB-SoniaNeural"><input type="radio" name="voice" value="en-GB-SoniaNeural"><span class="voice-avatar female">S</span><div class="voice-info"><strong>Sonia</strong><small>UK Female</small></div></label>
+                    <label class="voice-option" data-voice="en-GB-RyanNeural"><input type="radio" name="voice" value="en-GB-RyanNeural"><span class="voice-avatar male">R</span><div class="voice-info"><strong>Ryan</strong><small>UK Male</small></div></label>
+                    <label class="voice-option selected" data-voice="en-IN-NeerjaNeural"><input type="radio" name="voice" value="en-IN-NeerjaNeural"><span class="voice-avatar female">N</span><div class="voice-info"><strong>Neerja</strong><small>Indian Female</small></div></label>
+                    <label class="voice-option" data-voice="en-IN-PrabhatNeural"><input type="radio" name="voice" value="en-IN-PrabhatNeural"><span class="voice-avatar male">P</span><div class="voice-info"><strong>Prabhat</strong><small>Indian Male</small></div></label>
+                    <label class="voice-option" data-voice="en-AU-NatashaNeural"><input type="radio" name="voice" value="en-AU-NatashaNeural"><span class="voice-avatar female">N</span><div class="voice-info"><strong>Natasha</strong><small>Australian Female</small></div></label>
+                    <label class="voice-option" data-voice="en-AU-WilliamNeural"><input type="radio" name="voice" value="en-AU-WilliamNeural"><span class="voice-avatar male">W</span><div class="voice-info"><strong>William</strong><small>Australian Male</small></div></label>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-large w-full" id="generateVoiceBtn">
+                <span class="material-icons-round">record_voice_over</span> Convert Text to Voice
+            </button>
+
+            <div id="voiceLoading" class="loading-state hidden mt-4"><div class="spinner"></div><p>Generating speech...</p></div>
+
+            <div id="audioResult" class="card result-card hidden mt-4">
+                <div class="success-banner">
+                    <div class="flex items-center gap-2 text-accent-green">
+                        <span class="material-icons-round">check_circle</span>
+                        <strong>Voice Generated Successfully!</strong>
+                    </div>
+                    <div class="audio-player-wrap"><audio id="audioPlayer" controls></audio></div>
+                    <div class="flex gap-2">
+                        <a id="downloadAudioBtn" href="#" download class="btn btn-outline">Download</a>
+                        <button class="btn btn-primary" onclick="document.getElementById('block-video').scrollIntoView({behavior:'smooth'})">Proceed to Step 2</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: VOICE TO VIDEO -->
+        <div class="step-block disabled" id="block-video">
+            <header class="mb-6">
+                <h2 class="text-2xl font-extrabold">Step 2: Voice to Video</h2>
+                <p class="subtitle">Upload an image and the system will create a talking-head video with lip sync</p>
+            </header>
+
+            <div id="audioReadyBar" class="audio-ready-bar mb-4 hidden">
+                <div class="flex items-center gap-3">
+                    <span class="material-icons-round text-accent-green">check_circle</span>
+                    <div><strong>Audio Ready</strong><small id="audioSummaryText" class="block opacity-60">Audio generated</small></div>
+                </div>
+                <audio id="audioPreviewMini" controls style="height: 32px;"></audio>
+            </div>
+
+            <div class="card mb-4">
+                <h3 class="mb-2">Upload Presenter Image</h3>
+                <div class="upload-zone" id="imageUploadZone"><span class="material-icons-round">add_a_photo</span><p>Click to upload image</p><input type="file" id="imageFileInput" accept=".jpg,.jpeg,.png" hidden></div>
+                <div id="imagePreview" class="image-preview hidden mt-4"><img id="previewImg" src=""><button class="btn btn-outline btn-small" id="removeImgBtn">Remove</button></div>
+            </div>
+
+            <div class="card mb-4">
+                <h3 class="mb-4">Video Settings</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="setting-item"><label>Avatar Engine</label><select id="avatarEngine" class="select-input"><option value="sadtalker">SadTalker</option><option value="wav2lip">Wav2Lip</option></select></div>
+                    <div class="setting-item"><label>Subtitles</label><select id="subtitleMode" class="select-input"><option value="burnin">Burn-in</option><option value="none">None</option></select></div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-large w-full" id="generateVideoBtn" disabled>Generate Video with Lip Sync</button>
+
+            <div id="videoLoading" class="loading-state hidden mt-4"><div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div><p id="videoStatusText">Rendering video...</p></div>
+
+            <div id="videoResult" class="card result-card hidden mt-4">
+                <div class="video-player-wrap"><video id="videoPlayer" controls></video></div>
+                <div class="flex gap-2 mt-4">
+                    <a id="downloadVideoBtn" href="#" download class="btn btn-outline">Download</a>
+                    <button class="btn btn-primary" onclick="document.getElementById('block-publish').scrollIntoView({behavior:'smooth'})">Proceed to Step 3</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: YOUTUBE UPLOAD -->
+        <div class="step-block disabled" id="block-publish">
+            <header class="mb-6">
+                <h2 class="text-2xl font-extrabold">Step 3: YouTube Upload</h2>
+                <p class="subtitle">Publish your finalized video to your channel</p>
+            </header>
+
+            <div class="card mb-4">
+                <div class="form-row"><label>Title</label><input type="text" id="ytTitle" class="text-input"></div>
+                <div class="form-row"><label>Description</label><textarea id="ytDescription" rows="4" class="text-input"></textarea></div>
+            </div>
+
+            <button class="btn btn-primary btn-large w-full" id="publishBtn" disabled>Publish Now</button>
+
+            <div id="publishResult" class="card result-card hidden mt-4">
+                <div class="result-header"><span class="material-icons-round result-icon success">check_circle</span><h3>Published!</h3></div>
+                <a id="youtubeLink" href="#" target="_blank" class="btn btn-primary btn-large w-full">View on YouTube</a>
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+    <script src="/static/app.js?v=12.0"></script>
+</body>
+</html>

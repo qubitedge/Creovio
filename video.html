@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Presenter - CreoVio Studio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=JetBrains+Mono:wght@500;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-teal: #7ecfcf;
+            --dark-teal: #144f4f;
+            --mid-teal: #1f6b6b;
+            --accent-teal: #5bbcbc;
+            --muted-teal: #2d8a8a;
+            --text-dark: #1a4a4a;
+            --glass-bg: rgba(255, 255, 255, 0.18);
+            --glass-border: rgba(255, 255, 255, 0.35);
+            --card-hover: rgba(255, 255, 255, 0.27);
+            --shadow-soft: 0 4px 24px rgba(45, 138, 138, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body {
+            background: var(--bg-teal);
+            color: var(--text-dark);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background texture and blobs */
+        .dot-grid {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+            background-size: 26px 26px;
+            z-index: -1;
+        }
+
+        .blob {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            filter: blur(60px);
+            opacity: 0.35;
+            border-radius: 50%;
+            z-index: -2;
+            animation: blobDrift 20s infinite alternate ease-in-out;
+        }
+        .blob-1 { background: white; top: -10%; left: -5%; }
+        .blob-2 { background: var(--accent-teal); bottom: -10%; right: -5%; animation-delay: -5s; }
+        .blob-3 { background: var(--mid-teal); top: 40%; left: 60%; animation-duration: 25s; }
+
+        @keyframes blobDrift { 0%{transform:translate(0,0) scale(1);} 100%{transform:translate(30px,40px) scale(1.1);} }
+        @keyframes fadeDown { from{opacity:0;transform:translateY(-14px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes slideUp { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes hologram { 
+            0% { opacity: 0.7; transform: scale(1.02); filter: hue-rotate(0deg) brightness(1.2); }
+            50% { opacity: 1; transform: scale(1); filter: hue-rotate(5deg) brightness(1.4); }
+            100% { opacity: 0.7; transform: scale(1.02); filter: hue-rotate(0deg) brightness(1.2); }
+        }
+        @keyframes flicker {
+            0% { opacity: 0.8; }
+            5% { opacity: 0.4; }
+            10% { opacity: 0.8; }
+            15% { opacity: 0.9; }
+            20% { opacity: 0.5; }
+            25% { opacity: 1; }
+            80% { opacity: 1; }
+            90% { opacity: 0.6; }
+            100% { opacity: 0.8; }
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        @keyframes laserMove {
+            0% { top: 0%; opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        @keyframes hudFlicker {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.2; }
+            51% { opacity: 0.8; }
+        }
+        @keyframes glitchMove {
+            0% { clip-path: inset(80% 0 0 0); }
+            20% { clip-path: inset(20% 0 60% 0); }
+            40% { clip-path: inset(50% 0 30% 0); }
+            60% { clip-path: inset(10% 0 80% 0); }
+            80% { clip-path: inset(40% 0 20% 0); }
+            100% { clip-path: inset(80% 0 0 0); }
+        }
+        @keyframes barPulse { 0%,100%{height:5px;opacity:0.35;} 50%{height:22px;opacity:0.8;} }
+        @keyframes spinStar { to{transform:rotate(360deg);} }
+        @keyframes scanDown { 0%{top:3%;opacity:1;} 85%{top:97%;opacity:0.8;} 100%{top:3%;opacity:0;} }
+        @keyframes ringExp { 0%{width:60px;height:60px;opacity:0.7;} 100%{width:160px;height:160px;opacity:0;} }
+        @keyframes stPulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(31,107,107,0.4);} 50%{box-shadow:0 0 0 5px rgba(31,107,107,0);} }
+        @keyframes sdPulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+        /* Layout Container */
+        .wrapper {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            animation: fadeDown 0.5s ease;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            font-family: 'Nunito', sans-serif;
+        }
+        .logo span { opacity: 0.6; }
+
+        .header-meta { display: flex; align-items: center; gap: 1rem; }
+        
+        .ai-pill {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(8px);
+        }
+
+        .dot { width: 6px; height: 6px; background: #34d399; border-radius: 50%; animation: stPulse 2s infinite; }
+
+        .btn-back {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Progress Bar */
+        .stage-bar {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .stage-bar::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 1.5px;
+            background: rgba(255,255,255,0.4);
+            z-index: 0;
+        }
+
+        .step {
+            width: 30px;
+            height: 30px;
+            background: var(--dark-teal);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 800;
+            z-index: 1;
+            position: relative;
+            box-shadow: 0 0 0 4px var(--bg-teal);
+        }
+
+        .step.active {
+            background: white;
+            color: var(--dark-teal);
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.25), 0 0 0 8px var(--bg-teal);
+        }
+
+        .step.inactive { opacity: 0.4; }
+
+        .step-label {
+            position: absolute;
+            top: 38px;
+            font-size: 0.6rem;
+            font-weight: 800;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted-teal);
+        }
+
+        /* Two-Column Grid */
+        .app-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 22px;
+            align-items: stretch;
+        }
+        
+        .controls-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Card System */
+        .card {
+            background: var(--glass-bg);
+            border: 1.5px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            border-radius: 22px;
+            padding: 2.2rem;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 0.8rem; /* Minimal gap */
+            transition: all 0.3s ease;
+            animation: slideUp 0.5s ease both;
+        }
+
+        .card:hover { background: var(--card-hover); border-color: rgba(255,255,255,0.5); }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: 1.25rem;
+            color: var(--dark-teal);
+        }
+
+        /* Audio Source Card */
+        .audio-inner {
+            background: rgba(255,255,255,0.25);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .mic-box {
+            width: 48px;
+            height: 48px;
+            background: var(--dark-teal);
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            animation: audioBreath 2s infinite ease-in-out;
+        }
+
+        .audio-meta { flex: 1; }
+        .audio-status { font-size: 0.8rem; font-weight: 800; display: block; }
+        .audio-file { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted-teal); }
+
+        .waveform { display: flex; align-items: flex-end; gap: 3px; height: 22px; padding: 0 10px; }
+        .wf-bar {
+            width: 3px;
+            background: var(--dark-teal);
+            opacity: 0.5;
+            border-radius: 2px;
+            animation: barPulse 1s infinite alternate;
+        }
+
+        .btn-replace {
+            background: transparent;
+            border: 1.5px solid rgba(20, 79, 79, 0.2);
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+            color: var(--dark-teal);
+            transition: all 0.2s;
+        }
+        .btn-replace:hover { background: white; border-color: white; }
+
+        /* Robot Grid */
+        .robot-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 1.2rem;
+        }
+
+        .robot-slot {
+            aspect-ratio: 1;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .robot-slot:hover { border-color: white; background: rgba(255,255,255,0.1); }
+
+        .robot-slot.selected {
+            background: var(--dark-teal);
+            border-color: var(--dark-teal);
+            box-shadow: 0 8px 24px rgba(20, 79, 79, 0.3);
+        }
+
+        .robot-slot.selected svg path,
+        .robot-slot.selected svg rect,
+        .robot-slot.selected svg circle { stroke: white; }
+
+        .check-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-teal);
+            font-size: 0.7rem;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.3s;
+        }
+
+        .robot-slot.selected .check-badge { opacity: 1; transform: scale(1); }
+
+        .upload-dashed {
+            border: 2px dashed rgba(255,255,255,0.35);
+            border-radius: 18px;
+            padding: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-dashed:hover { background: rgba(255,255,255,0.1); border-color: white; }
+        .upload-dashed span { display: block; font-size: 0.75rem; font-weight: 800; color: var(--muted-teal); }
+        .upload-dashed small { font-size: 0.6rem; opacity: 0.6; }
+
+        /* Render Config */
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .config-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 800;
+            color: var(--muted-teal);
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+            display: block;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.25);
+            border: 1.5px solid transparent;
+            border-radius: 12px;
+            color: var(--text-dark);
+            font-weight: 700;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+        }
+        select:focus { border-color: var(--accent-teal); background: white; }
+
+        .toggle-row {
+            display: flex;
+            gap: 5px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px;
+            border-radius: 12px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 9px;
+            border: none;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: var(--dark-teal);
+            color: white;
+            box-shadow: 0 4px 12px rgba(20, 79, 79, 0.2);
+        }
+
+        /* Start Render Btn */
+        .btn-render {
+            width: 100%;
+            background: var(--dark-teal);
+            color: white;
+            border: none;
+            padding: 17px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(20, 79, 79, 0.2);
+        }
+
+        .btn-render:hover { background: var(--mid-teal); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(20, 79, 79, 0.3); }
+
+        .btn-render i { animation: spinStar 4s linear infinite; }
+
+        /* Right Column Preview */
+        .preview-area { position: sticky; top: 2rem; }
+        .preview-header { margin-bottom: 0.8rem; }
+        .preview-header h3 { font-size: 0.9rem; font-weight: 800; color: var(--dark-teal); }
+        .preview-header p { font-size: 0.7rem; color: var(--muted-teal); font-weight: 600; }
+
+        .panel-stack { display: flex; flex-direction: column; gap: 14px; }
+
+        .preview-panel {
+            background: #0d3535;
+            aspect-ratio: 9/13;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+
+        .label-monospace {
+            position: absolute; bottom: 20px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+            color: var(--accent-teal); letter-spacing: 0.15em;
+            animation: sdPulse 1.5s infinite;
+            z-index: 20;
+        }
+
+        .hologram-img {
+            animation: hologram 4s infinite ease-in-out, flicker 0.2s infinite;
+            mix-blend-mode: screen;
+            opacity: 0.9;
+        }
+
+        .scanline-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 18;
+            pointer-events: none;
+            display: block;
+        }
+
+        .laser-line {
+            position: absolute; left: 0; right: 0; height: 2px;
+            background: rgba(91, 188, 188, 0.8);
+            box-shadow: 0 0 15px rgba(91, 188, 188, 0.9), 0 0 30px rgba(91, 188, 188, 0.5);
+            z-index: 19;
+            animation: laserMove 3s infinite linear;
+            display: block;
+        }
+
+        .hud-data {
+            position: absolute; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.55rem; color: var(--accent-teal);
+            z-index: 21; text-transform: uppercase;
+            animation: hudFlicker 4s infinite;
+            display: block;
+            pointer-events: none;
+        }
+        .hud-tl { top: 20px; left: 20px; }
+        .hud-tr { top: 20px; right: 20px; text-align: right; }
+        .hud-bl { bottom: 60px; left: 20px; }
+        .hud-br { bottom: 60px; right: 20px; text-align: right; }
+
+        /* Render Overlay */
+        .render-overlay {
+            position: absolute; inset: 0;
+            background: rgba(5,20,20,0.88);
+            z-index: 100;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 2rem; opacity: 0; pointer-events: none; transition: all 0.4s;
+        }
+        .render-overlay.active { opacity: 1; pointer-events: all; }
+
+        .percent-val { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 700; color: var(--accent-teal); margin-bottom: 1.5rem; }
+        
+        .pbar-container { width: 100%; height: 5px; background: rgba(255,255,255,0.1); border-radius: 100px; margin-bottom: 1rem; overflow: hidden; }
+        .pbar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-teal), var(--muted-teal)); box-shadow: 0 0 15px var(--accent-teal); transition: width 0.1s; }
+        
+        .step-log { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--accent-teal); text-transform: uppercase; }
+
+        /* Panel 2 Generated Video */
+        .video-panel { background: #000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .video-panel-empty { opacity: 0.25; text-align: center; padding: 2rem; }
+        .video-panel-empty i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+        .video-panel-empty p { font-size: 0.75rem; font-weight: 700; color: white; line-height: 1.4; }
+
+        .fake-player { position: absolute; inset: 0; display: none; background: #000; flex-direction: column; }
+        .fake-player-view { flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        
+        /* Video silhouette and lip sync */
+        .silhouette { width: 120px; height: 120px; opacity: 0.8; }
+        .mouth-dots { display: flex; gap: 4px; position: absolute; bottom: 85px; }
+        .m-dot { width: 4px; height: 4px; background: white; border-radius: 50%; opacity: 0; }
+        .fake-player.playing .m-dot { animation: dotDance 0.4s infinite alternate; opacity: 1; }
+        @keyframes dotDance { to { transform: translateY(-4px); } }
+
+        .play-overlay { width: 50px; height: 50px; background: rgba(91,188,188,0.2); border: 1.5px solid var(--accent-teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent-teal); cursor: pointer; transition: all 0.3s; z-index: 10; }
+        .play-overlay:hover { transform: scale(1.1); background: rgba(91,188,188,0.3); }
+
+        .controls-bar {
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(8px);
+            padding: 10px 15px; display: flex; align-items: center; gap: 12px;
+        }
+        .scrubber { flex: 1; height: 4px; background: rgba(255,255,255,0.15); border-radius: 100px; position: relative; cursor: pointer; }
+        .scrubber-fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--accent-teal); border-radius: 100px; }
+        .timecode { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: rgba(255,255,255,0.5); }
+
+        .badge-ready {
+            position: absolute; top: -10px; right: -5px;
+            background: rgba(52,211,153,0.15); color: #34d399;
+            padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 800;
+            border: 1px solid rgba(52,211,153,0.3); display: none; z-index: 10;
+        }
+
+        /* Action Buttons */
+        .bottom-actions { margin-top: 1.2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-action {
+            padding: 14px; border-radius: 16px; font-size: 0.85rem; font-weight: 800; cursor: pointer;
+            transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+            width: 100%;
+        }
+        .btn-ghost { background: var(--glass-bg); border: 1.5px solid var(--glass-border); color: var(--dark-teal); opacity: 0.4; pointer-events: none; }
+        .btn-solid-action { background: var(--dark-teal); border: none; color: white; opacity: 0.4; pointer-events: none; }
+
+        .btn-action.ready { opacity: 1; pointer-events: all; }
+        .btn-action.ready:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+        /* Panel Labels */
+        .p-label { display: flex; justify-content: space-between; margin-top: 6px; }
+        .p-label span { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted-teal); font-weight: 700; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <div class="dot-grid"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="wrapper">
+        <header class="app-header">
+            <div class="logo">Creo<span>Vio</span></div>
+            <div class="header-right" style="display: flex; gap: 1.5rem; align-items: center;">
+                <a href="/projects" style="color: var(--dark-teal); font-weight: 800; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; opacity: 0.8; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+                    📁 My Projects
+                </a>
+                <a href="/dashboard" class="btn-back">← Back</a>
+            </div>
+        </header>
+
+
+        <main class="app-grid" style="align-items: stretch;">
+            <!-- Controls Column -->
+            <div class="controls-col">
+                <!-- Audio Source -->
+                <div class="card" style="animation-delay: 0.15s; margin-bottom: 1.5rem;">
+                    <div class="card-title">Audio Source</div>
+                    <div class="audio-inner">
+                        <div class="mic-box">🎙️</div>
+                        <div class="audio-meta">
+                            <span class="audio-status">Audio Loaded</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="audio-file" id="displayAudioFile">job_15_audio.mp3</span>
+                                <button id="playAudioBtn" onclick="previewAudio()" style="background: var(--dark-teal); color: white; border: none; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.7rem;">▶</button>
+                            </div>
+                            <audio id="previewAudioElement" style="display: none;"></audio>
+                        </div>
+                        <div class="waveform">
+                            <div class="wf-bar" style="animation-delay: 0.1s;"></div>
+                            <div class="wf-bar" style="animation-delay: 0.2s;"></div>
+                            <div class="wf-bar" style="animation-delay: 0.3s;"></div>
+                            <div class="wf-bar" style="animation-delay: 0.4s;"></div>
+                            <div class="wf-bar" style="animation-delay: 0.5s;"></div>
+                            <div class="wf-bar" style="animation-delay: 0.6s;"></div>
+                            <div class="wf-bar" style="animation-delay: 0.7s;"></div>
+                        </div>
+                        <button class="btn-replace" onclick="document.getElementById('audioInput').click()">↑ Replace</button>
+                        <input type="file" id="audioInput" accept="audio/*" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- Select Avatar -->
+                <div class="card" style="animation-delay: 0.28s; margin-bottom: 1.5rem;">
+                    <div class="card-title">Select Presenter</div>
+                    <div class="upload-dashed" id="uploadBox" onclick="document.getElementById('imageInput').click()" style="padding: 5rem 1rem; position: relative; overflow: hidden; min-height: 280px; display: flex; align-items: center; justify-content: center;">
+                        <div id="uploadPlaceholder">
+                            <span style="font-size: 1.2rem; margin-bottom: 0.8rem; color: var(--dark-teal)">📸 Upload your own portrait</span>
+                            <small style="font-weight: 700; opacity: 0.7; display: block;">.jpg or .png supported</small>
+                        </div>
+                        <img id="uploadThumb" style="display: none; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3;">
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    </div>
+                    
+                    <!-- AI Analysis Features (Fills Space) -->
+                    <div id="aiAnalysis" style="margin-top: 1.5rem; display: none; animation: fadeIn 0.5s ease;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+                            <span style="font-size: 0.7rem; font-weight: 700; color: var(--dark-teal);">LIGHTING QUALITY</span>
+                            <span style="font-size: 0.7rem; font-weight: 800; color: #059669;">OPTIMAL</span>
+                        </div>
+                        <div style="width: 100%; height: 4px; background: rgba(0,0,0,0.1); border-radius: 2px; margin-bottom: 1.2rem;">
+                            <div style="width: 92%; height: 100%; background: #10b981; border-radius: 2px;"></div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 10px; text-align: center;">
+                                <div style="font-size: 0.6rem; opacity: 0.6;">POSE</div>
+                                <div style="font-size: 0.75rem; font-weight: 800;">FRONTAL</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 10px; text-align: center;">
+                                <div style="font-size: 0.6rem; opacity: 0.6;">RES</div>
+                                <div style="font-size: 0.75rem; font-weight: 800;">4K READY</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Config -->
+                <div class="card" style="animation-delay: 0.42s;">
+                    <div class="card-title">Render Configuration</div>
+                    <div class="config-grid" style="gap: 2rem; margin-bottom: 2rem;">
+                        <div>
+                            <label class="config-label">Animation Mode</label>
+                            <div class="toggle-row" id="engineToggle" style="padding: 6px;">
+                                <button class="toggle-btn active" onclick="setEngineMode(this, 'fast')" style="padding: 12px;">⚡ Fast</button>
+                                <button class="toggle-btn" onclick="setEngineMode(this, 'studio')" style="padding: 12px;">✨ Studio</button>
+                            </div>
+                            <input type="hidden" id="engineMode" value="fast">
+                        </div>
+                        <div>
+                            <label class="config-label">Subtitles</label>
+                            <div class="toggle-row" style="padding: 6px;">
+                                <button class="toggle-btn active" onclick="togglePair(this)" style="padding: 12px;">Burn-in</button>
+                                <button class="toggle-btn" onclick="togglePair(this)" style="padding: 12px;">None</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label class="config-label">Subtitle Transcript</label>
+                        <textarea id="transcriptInput" style="width: 100%; height: 80px; background: rgba(255,255,255,0.25); border: 1.5px solid transparent; border-radius: 12px; padding: 12px; color: var(--text-dark); font-family: inherit; font-size: 0.85rem; outline: none; resize: none;" placeholder="Enter text for subtitles..."></textarea>
+                    </div>
+                    <label class="config-label">Output Quality</label>
+                    <div class="toggle-row" style="max-width: 300px; padding: 6px; margin-bottom: 2rem;">
+                        <button class="toggle-btn" onclick="togglePair(this)" style="padding: 12px;">720p</button>
+                        <button class="toggle-btn active" onclick="togglePair(this)" style="padding: 12px;">1080p</button>
+                        <button class="toggle-btn" onclick="togglePair(this)" style="padding: 12px;">4K</button>
+                    </div>
+
+                    <!-- Scene Enhancement (Fills Space) -->
+                    <div style="padding-top: 1.5rem; border-top: 1.5px dashed rgba(20, 79, 79, 0.1);">
+                        <label class="config-label">Scene Enhancements</label>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.75rem; font-weight: 600;">Deepfake Stabilization</span>
+                                <div class="toggle-switch on" onclick="toggleSwitch(this)" style="width: 36px; height: 20px; background: var(--dark-teal); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s;">
+                                    <div class="toggle-knob" style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></div>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.75rem; font-weight: 600;">Eye-Contact Correction</span>
+                                <div class="toggle-switch off" onclick="toggleSwitch(this)" style="width: 36px; height: 20px; background: rgba(0,0,0,0.15); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s;">
+                                    <div class="toggle-knob" style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></div>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.75rem; font-weight: 600;">Background Blur</span>
+                                <div class="toggle-switch off" onclick="toggleSwitch(this)" style="width: 36px; height: 20px; background: rgba(0,0,0,0.15); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s;">
+                                    <div class="toggle-knob" style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></div>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.75rem; font-weight: 600;">Auto Color Grade</span>
+                                <div class="toggle-switch on" onclick="toggleSwitch(this)" style="width: 36px; height: 20px; background: var(--dark-teal); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s;">
+                                    <div class="toggle-knob" style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <button class="btn-render" id="renderBtn" onclick="startRender()">
+                    <i>✦</i> START AI RENDERING
+                </button>
+            </div>
+
+            <!-- Preview Column -->
+            <div class="preview-col">
+                <div class="preview-area">
+                    <div class="preview-header">
+                        <h3>Render Preview</h3>
+                        <p>Avatar animation · Generated video</p>
+                    </div>
+
+                    <div class="panel-stack">
+                        <!-- Panel 1: Animation -->
+                        <div class="preview-panel" id="panel1" style="display: flex; align-items: center; justify-content: center; background: #082020;">
+
+                            <img id="userPortraitPreview" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; display: none; z-index: 10; animation: slideUp 0.8s ease;">
+                            <img id="renderReviewImg" src="/static/render_preview.png" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; z-index: 15;">
+                            
+                            <div id="scanlineOverlay" class="scanline-overlay"></div>
+                            <div id="laserLine" class="laser-line"></div>
+                            
+                            <!-- HUD Elements -->
+                            <div class="hud-data hud-tl" id="hud1">ANALYZING GEOMETRY...<br>POINTS: 12,840<br>VAR: 0.042</div>
+                            <div class="hud-data hud-tr" id="hud2">RENDER ENGINE: SADTALKER<br>SPS: 24.0<br>QUEUE: ACTIVE</div>
+                            <div class="hud-data hud-bl" id="hud3">SYNCING MOUTH...<br>FRAME: 00482<br>LATENCY: 12ms</div>
+                            <div class="hud-data hud-br" id="hud4">OUTPUT: 1080P/60<br>BITRATE: 8MBPS<br>STATUS: COMPILING</div>
+
+                            <!-- Idle State (Lab Preview) -->
+                            <img id="idleLabPreview" src="/static/render_preview.png" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6; z-index: 5;">
+
+                            <div class="label-monospace" id="renderLabel">AWAITING RENDER...</div>
+
+                            <!-- Overlay -->
+                            <div class="render-overlay" id="renderOverlay">
+                                <div class="percent-val" id="percentCount">0%</div>
+                                <div class="pbar-container">
+                                    <div class="pbar-fill" id="pbarFill"></div>
+                                </div>
+                                <div class="step-log" id="stepLog">LOADING MODEL...</div>
+                                <div id="etaDisplay" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--accent-teal);margin-top:0.5rem;opacity:0.7;"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-label">
+                            <span id="appliedEngine">SadTalker</span>
+                            <span id="appliedBot">READY</span>
+                        </div>
+
+                        <!-- Panel 2: Final Video -->
+                        <div class="preview-panel video-panel">
+                            <div class="badge-ready" id="readyBadge">Ready to Download</div>
+                            
+                            <div class="video-panel-empty" id="videoEmpty" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                <img src="/static/render_preview.png" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.2;">
+                                <div style="position: relative; z-index: 2; text-align: center; padding: 2rem;">
+                                    <p style="font-size: 0.85rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">READY FOR GENERATION</p>
+                                    <span class="label-monospace" style="position: static; opacity: 0.5; font-size: 0.6rem;">VIDEO PIPELINE STANDBY</span>
+                                </div>
+                            </div>
+
+                            <div class="fake-player" id="fakePlayer" style="background: #000; width: 100%; height: 100%;">
+                                <video id="realVideoPlayer" controls style="width: 100%; height: 100%; object-fit: contain; display: block;">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                        </div>
+                        <div class="p-label">
+                            <span id="fileSizeLabel">-- MB</span>
+                            <span>1080p · MP4</span>
+                        </div>
+                    </div>
+
+                    <div class="bottom-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <button class="btn-action btn-ghost" id="dlBtn" onclick="downloadVideo()">⬇ Download MP4</button>
+                        <button class="btn-action btn-solid-action" id="pubBtn">▶ Publish to YouTube</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/creovio.js"></script>
+    <script>
+        let currentSec = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        const stages = ["LOADING MODEL...", "SYNCING AUDIO...", "ANIMATING FACE...", "3D MOTION PASS...", "BURNING SUBS...", "ENCODING MP4...", "COMPLETE ✓"];
+
+        function toggleSwitch(el) {
+            if (el.classList.contains('on')) {
+                el.classList.remove('on');
+                el.classList.add('off');
+                el.style.background = 'rgba(0,0,0,0.15)';
+                el.querySelector('.toggle-knob').style.left = '2px';
+                el.querySelector('.toggle-knob').style.right = 'auto';
+            } else {
+                el.classList.remove('off');
+                el.classList.add('on');
+                el.style.background = 'var(--dark-teal)';
+                el.querySelector('.toggle-knob').style.right = '2px';
+                el.querySelector('.toggle-knob').style.left = 'auto';
+            }
+        }
+
+        // Init from State and URL Params
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlAudio = urlParams.get('audio');
+            const urlJobId = urlParams.get('job_id');
+            const urlText = urlParams.get('text');
+
+            if (urlAudio && urlJobId) {
+                CreoVio.updateState({
+                    currentJobId: urlJobId,
+                    audioUrl: urlAudio,
+                    text: urlText || ""
+                });
+            }
+
+            if (CreoVio.state.audioUrl) {
+                const parts = CreoVio.state.audioUrl.split('/');
+                document.getElementById('displayAudioFile').innerText = parts[parts.length - 1];
+                document.getElementById('previewAudioElement').src = CreoVio.state.audioUrl;
+            }
+
+            if (CreoVio.state.text) {
+                document.getElementById('transcriptInput').value = CreoVio.state.text;
+            }
+        });
+
+        function previewAudio() {
+            const audio = document.getElementById('previewAudioElement');
+            const btn = document.getElementById('playAudioBtn');
+            
+            if (audio.paused) {
+                audio.play();
+                btn.innerText = "⏸";
+            } else {
+                audio.pause();
+                btn.innerText = "▶";
+            }
+            
+            audio.onended = () => { btn.innerText = "▶"; };
+        }
+
+        function togglePair(btn) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function setEngineMode(btn, mode) {
+            togglePair(btn);
+            document.getElementById('engineMode').value = mode;
+        }
+
+        async function startRender() {
+            const jobId = CreoVio.state.currentJobId;
+            if (!jobId) return alert("No active job found. Please generate audio first.");
+
+            const btn = document.getElementById('renderBtn');
+            const overlay = document.getElementById('renderOverlay');
+            const pFill = document.getElementById('pbarFill');
+            const pCount = document.getElementById('percentCount');
+            const log = document.getElementById('stepLog');
+            
+            const engineMode = document.getElementById('engineMode').value;
+            const engine = engineMode;
+            const subtitleBtn = document.querySelector('.toggle-row .toggle-btn.active');
+            const subtitleMode = subtitleBtn.innerText.toLowerCase() === 'burn-in' ? 'burn' : 'none';
+            const imageInput = document.getElementById('imageInput');
+            const transcriptInput = document.getElementById('transcriptInput');
+
+            document.getElementById('appliedEngine').innerText = engine.toUpperCase();
+
+            btn.disabled = true;
+            btn.style.opacity = "0.6";
+            overlay.classList.add('active');
+
+            // Show Lab Preview
+            const idlePreview = document.getElementById('idleLabPreview');
+            if (idlePreview) idlePreview.style.display = 'none';
+            
+            const labImg = document.getElementById('renderReviewImg');
+            labImg.style.display = 'block';
+            labImg.classList.add('hologram-img');
+            
+            document.getElementById('scanlineOverlay').style.display = 'block';
+            document.getElementById('laserLine').style.display = 'block';
+            document.querySelectorAll('.hud-data').forEach(h => h.style.display = 'block');
+            
+            document.getElementById('renderLabel').innerText = "AI LAB SCAN ACTIVE";
+            document.getElementById('renderLabel').style.color = "white";
+
+            const formData = new FormData();
+            formData.append('job_id', jobId);
+            formData.append('avatar_engine', engine);
+            formData.append('subtitle_mode', subtitleMode);
+            if (transcriptInput.value.trim()) {
+                formData.append('transcript', transcriptInput.value.trim());
+            }
+            if (imageInput.files[0]) {
+                formData.append('image', imageInput.files[0]);
+            }
+
+            try {
+                log.innerText = "INITIALIZING PIPELINE...";
+                const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/generate-video/', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || "Failed to start rendering");
+                }
+
+                // Start Polling
+                pollStatus(jobId);
+
+            } catch (e) {
+                alert("Render error: " + e.message);
+                overlay.classList.remove('active');
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            }
+        }
+
+        async function pollStatus(jobId) {
+            const pFill   = document.getElementById('pbarFill');
+            const pCount  = document.getElementById('percentCount');
+            const log     = document.getElementById('stepLog');
+            const startTs = Date.now();
+
+            let etaEl = document.getElementById('etaDisplay');
+
+            // Try WebSocket first for real-time updates
+            let wsWorking = false;
+            try {
+                const ws = new WebSocket(`wss://peoples-but-runtime-kept.trycloudflare.com/ws/jobs`);
+                ws.onopen = () => { wsWorking = true; };
+                ws.onmessage = (evt) => {
+                    const d = JSON.parse(evt.data);
+                    if (d.job_id != jobId) return;
+                    pFill.style.width  = d.progress + '%';
+                    pCount.innerText   = d.progress + '%';
+                    log.innerText      = d.status;
+                    updateETA(startTs, d.progress, etaEl);
+                    if (d.status === 'COMPLETE') {
+                        ws.close();
+                        fetchAndFinish(jobId);
+                    } else if (d.status === 'FAILED') {
+                        ws.close();
+                        alert('Render failed on server.');
+                        resetRenderBtn();
+                    }
+                };
+                ws.onerror = () => { wsWorking = false; };
+            } catch(e) { wsWorking = false; }
+
+            // Fallback: HTTP polling if WS fails
+            await new Promise(r => setTimeout(r, 1500));
+            if (!wsWorking) {
+                const poll = setInterval(async () => {
+                    try {
+                        const res  = await fetch(`https://peoples-but-runtime-kept.trycloudflare.com/jobs/${jobId}/status`);
+                        const data = await res.json();
+                        const fakeP = Math.min(95, (Date.now() - startTs) / 1000 / 1.5);
+                        pFill.style.width = fakeP + '%';
+                        pCount.innerText  = Math.floor(fakeP) + '%';
+                        updateETA(startTs, fakeP, etaEl);
+
+                        const labels = {
+                            'TTS_DONE':   'PREPARING ASSETS...',
+                            'AVATAR_DONE':'ENCODING VIDEO...',
+                            'PENDING':    'ANIMATING FACE...',
+                        };
+                        log.innerText = labels[data.status] || 'PIPELINE ACTIVE...';
+
+                        if (data.status === 'VIDEO_DONE') {
+                            clearInterval(poll);
+                            pFill.style.width = '100%';
+                            pCount.innerText  = '100%';
+                            log.innerText     = 'COMPLETE ✓';
+                            etaEl.innerText   = '';
+                            CreoVio.updateState({
+                                videoUrl: data.video_path.startsWith('/') ? data.video_path : '/' + data.video_path
+                            });
+                            setTimeout(finishRender, 800);
+                        } else if (data.status === 'FAILED') {
+                            clearInterval(poll);
+                            alert('Rendering failed on server.');
+                            resetRenderBtn();
+                        }
+                    } catch(e) { console.error('Poll error:', e); }
+                }, 3000);
+            }
+        }
+
+        function updateETA(startTs, progress, el) {
+            if (!el) return;
+            if (progress < 5) { el.innerText = 'Calculating ETA...'; return; }
+            const elapsed = (Date.now() - startTs) / 1000;
+            const total   = elapsed / (progress / 100);
+            const remain  = Math.max(0, total - elapsed);
+            const mins    = Math.floor(remain / 60);
+            const secs    = Math.floor(remain % 60);
+            el.innerText  = mins > 0
+                ? `ETA: ~${mins}m ${secs}s remaining`
+                : `ETA: ~${secs}s remaining`;
+        }
+
+        async function fetchAndFinish(jobId) {
+            const res  = await fetch(`https://peoples-but-runtime-kept.trycloudflare.com/jobs/${jobId}/status`);
+            const data = await res.json();
+            CreoVio.updateState({
+                videoUrl: data.video_path?.startsWith('/') ? data.video_path : '/' + data.video_path,
+                status: 'video_ready'
+            });
+            setTimeout(finishRender, 800);
+        }
+
+        function resetRenderBtn() {
+            document.getElementById('renderOverlay').classList.remove('active');
+            const btn = document.getElementById('renderBtn');
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            const etaEl = document.getElementById('etaDisplay');
+            if (etaEl) etaEl.innerText = '';
+        }
+
+        function finishRender() {
+            document.getElementById('renderOverlay').classList.remove('active');
+            const labImg = document.getElementById('renderReviewImg');
+            labImg.classList.remove('hologram-img');
+            document.getElementById('scanlineOverlay').style.display = 'none';
+            document.getElementById('laserLine').style.display = 'none';
+            document.querySelectorAll('.hud-data').forEach(h => h.style.display = 'none');
+            
+            document.getElementById('renderLabel').innerText = "RENDER COMPLETE ✓";
+            document.getElementById('renderLabel').style.color = "#34d399";
+            document.getElementById('renderLabel').style.animation = "none";
+            
+            document.getElementById('videoEmpty').style.display = 'none';
+            const fakePlayer = document.getElementById('fakePlayer');
+            fakePlayer.style.display = 'flex';
+            
+            const realPlayer = document.getElementById('realVideoPlayer');
+            if (CreoVio.state.videoUrl) {
+                const videoUrlWithCacheBust = CreoVio.state.videoUrl + "?t=" + new Date().getTime();
+                realPlayer.src = videoUrlWithCacheBust;
+                realPlayer.load();
+            }
+            
+            document.getElementById('readyBadge').style.display = 'block';
+            document.getElementById('fileSizeLabel').innerText = "READY";
+
+            document.getElementById('dlBtn').classList.add('ready');
+            document.getElementById('pubBtn').classList.add('ready');
+            
+            const btn = document.getElementById('renderBtn');
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.innerHTML = "<i>✦</i> RE-RENDER?";
+
+            // MANUAL-PIPELINE: Enable the Publish Button
+            const pubBtn = document.getElementById('pubBtn');
+            pubBtn.classList.add('ready');
+            pubBtn.onclick = () => {
+                window.location.href = `/youtube?video=${encodeURIComponent(CreoVio.state.videoUrl)}&job_id=${CreoVio.state.currentJobId}`;
+            };
+            document.getElementById('readyBadge').innerText = "Video Ready for YouTube!";
+        }
+
+        function downloadVideo() {
+            if (CreoVio.state.videoUrl) {
+                const link = document.createElement('a');
+                link.href = CreoVio.state.videoUrl;
+                link.download = 'generated_video.mp4';
+                link.click();
+            } else {
+                alert("Video not ready.");
+            }
+        }
+
+        // Handle File Inputs
+        document.getElementById('audioInput').addEventListener('change', async (e) => {
+            if (e.target.files[0]) {
+                const file = e.target.files[0];
+                document.getElementById('displayAudioFile').innerText = "UPLOADING...";
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                try {
+                    const res = await fetch('https://peoples-but-runtime-kept.trycloudflare.com/upload-audio/', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    
+                    // Update state with the NEW job and audio URL
+                    CreoVio.updateState({
+                        currentJobId: data.job_id,
+                        audioUrl: data.audio_path.startsWith('/') ? data.audio_path : '/' + data.audio_path
+                    });
+                    
+                    document.getElementById('displayAudioFile').innerText = file.name;
+                    document.getElementById('previewAudioElement').src = CreoVio.state.audioUrl;
+                    console.log("Audio updated to job:", data.job_id);
+                } catch (err) {
+                    alert("Failed to upload audio: " + err.message);
+                    document.getElementById('displayAudioFile').innerText = "UPLOAD FAILED";
+                }
+            }
+        });
+
+        document.getElementById('imageInput').addEventListener('change', (e) => {
+            if (imageInput.files[0]) {
+                const file = imageInput.files[0];
+                const url = URL.createObjectURL(file);
+                
+                document.getElementById('uploadThumb').src = url;
+                document.getElementById('uploadThumb').style.display = 'block';
+                document.getElementById('uploadPlaceholder').style.display = 'none';
+                
+                // Show Portrait in Panel 1
+                document.getElementById('userPortraitPreview').src = url;
+                document.getElementById('userPortraitPreview').style.display = 'block';
+                
+                // Show AI Analysis Features
+                document.getElementById('aiAnalysis').style.display = 'block';
+                
+                // Hide Idle Robot
+                const idlePreview = document.getElementById('idleLabPreview');
+                if (idlePreview) idlePreview.style.display = 'none';
+                
+                document.getElementById('renderLabel').innerText = "AVATAR DETECTED";
+                document.getElementById('appliedBot').innerText = "CUSTOM PORTRAIT";
+            }
+        });
+    </script>
+</body>
+

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Lecture Library | CreoVio AI</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/creovio.js"></script>
+    
+    <style>
+        :root {
+            --bg-teal: #5BBFBF;
+            --bg-teal-light: #4DB8B8;
+            --text-dark: #1a4040;
+            --glass-white: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --accent-teal: #1a8080;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-teal), var(--bg-teal-light));
+            min-height: 100vh;
+            color: var(--text-dark);
+            padding: 2rem;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo { font-size: 1.8rem; font-weight: 900; color: var(--text-dark); }
+        .logo span { opacity: 0.6; }
+
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a {
+            color: var(--text-dark);
+            font-weight: 800;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+        .nav-links a:hover { opacity: 1; transform: translateY(-1px); }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .project-card {
+            background: var(--glass-white);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 60, 60, 0.1);
+        }
+        .project-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 12px 40px rgba(0, 60, 60, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .info-block h3 {
+            font-size: 1.1rem;
+            font-weight: 900;
+            margin-bottom: 0.4rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .status-VIDEO_DONE { background: #dcfce7; color: #166534; }
+        .status-TTS_DONE { background: #fef9c3; color: #854d0e; }
+        .status-PENDING { background: #dbeafe; color: #1e40af; animation: pulse 1.5s infinite; }
+        .status-FAILED { background: #fee2e2; color: #991b1b; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* Avatar Utility Classes */
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .gap-3 { gap: 0.75rem; }
+        .rounded-lg { border-radius: 12px; }
+        .w-8 { width: 32px; }
+        .h-8 { height: 32px; }
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+        .inset-0 { top: 0; left: 0; right: 0; bottom: 0; }
+        .overflow-hidden { overflow: hidden; }
+        .object-cover { object-fit: cover; }
+        .hidden { display: none; }
+        .bg-white\/20 { background: rgba(255,255,255,0.2); }
+        .bg-white\/40 { background: rgba(255,255,255,0.4); }
+        .border-white\/20 { border: 1px solid rgba(255,255,255,0.2); }
+        .p-1 { padding: 0.25rem; }
+        .pr-4 { padding-right: 1rem; }
+        .bg-aqua-dark { background: #1a8080; }
+        .text-aqua-dark { color: #1a8080; }
+        .font-black { font-weight: 900; }
+        .text-\[11px\] { font-size: 11px; }
+        .glass-dark { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); }
+
+        .media-preview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .player-box {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .player-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+
+        audio { width: 100%; height: 32px; filter: grayscale(1) invert(0.2); }
+        video {
+            width: 100%;
+            border-radius: 12px;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.75rem;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding-top: 1rem;
+        }
+
+        .btn-action {
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-download { background: var(--accent-teal); color: white; }
+        .btn-delete { background: rgba(153, 27, 27, 0.1); color: #991b1b; }
+        .btn-action:hover { opacity: 0.9; transform: scale(1.02); }
+
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            background: var(--glass-white);
+            border-radius: 32px;
+            border: 2px dashed var(--glass-border);
+        }
+
+        @media (max-width: 768px) {
+            .media-preview { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="logo">Creo<span>Vio</span></div>
+            <nav class="nav-links">
+                <a href="/dashboard"><i data-lucide="layout-dashboard"></i> Home</a>
+                <a href="/profile" class="flex items-center gap-3 glass-dark p-1 pr-4 rounded-xl border border-white/20 group hover:bg-white/40 transition-all" style="text-decoration: none;">
+                    <div class="w-8 h-8 rounded-lg bg-aqua-dark flex items-center justify-center text-white font-bold relative overflow-hidden text-[10px]">
+                        <span id="navAvatarInitials">P</span>
+                        <img id="navAvatarImg" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                    </div>
+                    <div class="text-[11px] font-black text-aqua-dark" id="userNameDisplay">Pravallika</div>
+                </a>
+            </nav>
+        </header>
+
+        <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <h1 style="font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em;">My Lecture Library</h1>
+                <p style="font-weight: 700; opacity: 0.7;">Your AI-generated education series</p>
+            </div>
+            <button onclick="fetchProjects()" style="background: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <i data-lucide="refresh-cw" style="width: 20px; color: var(--accent-teal);"></i>
+            </button>
+        </div>
+
+        <div id="projectsGrid" class="project-grid">
+            <!-- Loading -->
+            <div class="empty-state" id="loadingState">
+                <div style="margin-bottom: 1rem;"><i data-lucide="loader-2" class="animate-spin" style="width: 48px; opacity: 0.3;"></i></div>
+                <h3 style="font-weight: 800; opacity: 0.6;">Sinking with server...</h3>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        async function fetchProjects() {
+            try {
+                // Sync global UI (avatar, name)
+                if (typeof CreoVio !== 'undefined') {
+                    CreoVio.updateUI();
+                }
+
+                const res = await fetch('/api/projects');
+                const projects = await res.json();
+                renderProjects(projects);
+            } catch (e) {
+                console.error("Failed to fetch projects", e);
+                document.getElementById('projectsGrid').innerHTML = '<div class="empty-state"><h3>Failed to load projects. Ensure backend is running.</h3></div>';
+            }
+        }
+
+        function renderProjects(projects) {
+            const grid = document.getElementById('projectsGrid');
+            if (!projects || projects.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div style="margin-bottom: 1.5rem;"><i data-lucide="folder-plus" style="width: 64px; opacity: 0.2;"></i></div>
+                        <h2 style="font-weight: 900; margin-bottom: 0.5rem;">No projects yet</h2>
+                        <p style="font-weight: 700; opacity: 0.6; margin-bottom: 2rem;">Start by generating your first AI voice or video lecture.</p>
+                        <a href="/voice" style="background: white; color: var(--text-dark); padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 900; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">Create New Project</a>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            grid.innerHTML = projects.map(p => `
+                <div class="project-card">
+                    <div class="card-header">
+                        <div class="info-block">
+                            <span class="status-badge status-${p.status}">${p.status.replace('_', ' ')}</span>
+                            <h3 style="margin-top: 0.75rem;">${p.script || 'Untitled Lecture'}</h3>
+                            <div style="font-size: 0.8rem; font-weight: 800; opacity: 0.4;">ID: #${p.id}</div>
+                        </div>
+                    </div>
+
+                    <div class="media-preview">
+                        <!-- Audio Player -->
+                        <div class="player-box">
+                            <div class="player-label">Voice Audio</div>
+                            ${p.audio_url ? `
+                                <audio controls>
+                                    <source src="${p.audio_url}" type="audio/mpeg">
+                                </audio>
+                            ` : '<div style="font-size: 0.8rem; opacity: 0.4;">No audio generated</div>'}
+                        </div>
+
+                        <!-- Video Player -->
+                        <div class="player-box">
+                            <div class="player-label">AI Video</div>
+                            ${p.video_url ? `
+                                <video controls preload="metadata">
+                                    <source src="${p.video_url}" type="video/mp4">
+                                </video>
+                            ` : `
+                                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 1rem; opacity: 0.5;">
+                                    <i data-lucide="clapperboard" style="width: 16px;"></i>
+                                    <span style="font-size: 0.8rem; font-weight: 700;">${p.status === 'PENDING' ? 'Rendering in progress...' : 'No video generated'}</span>
+                                </div>
+                            `}
+                        </div>
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        ${p.video_url ? `<a href="${p.video_url}" download class="btn-action btn-download"><i data-lucide="download"></i> Save Video</a>` : ''}
+                        <button onclick="goToPublish(${p.id}, '${p.video_url || ''}', '${p.audio_url || ''}', \`${(p.script || '').replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)" class="btn-action" style="background: #ef4444; color: white;">
+                            <i data-lucide="play-square"></i> Publish
+                        </button>
+                        ${p.status !== 'VIDEO_DONE' && p.status !== 'PENDING' ? `<button onclick="resumeProject(${p.id})" class="btn-action" style="background: var(--bg-teal-dark); color: white;"><i data-lucide="play-circle"></i> Resume</button>` : ''}
+                        ${p.audio_url ? `<a href="${p.audio_url}" download class="btn-action" style="background: rgba(255,255,255,0.4);"><i data-lucide="music"></i> Audio</a>` : ''}
+                        <button onclick="deleteProject(${p.id})" class="btn-action btn-delete"><i data-lucide="trash-2"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        async function deleteProject(id) {
+            if (!confirm("Are you sure? This will permanently remove this project.")) return;
+            try {
+                await fetch(`/jobs/${id}`, { method: 'DELETE' });
+                fetchProjects();
+            } catch (e) {
+                alert("Failed to delete project.");
+            }
+        }
+
+        async function resumeProject(id) {
+            try {
+                const res = await fetch(`/jobs/${id}/retry`, { method: 'POST' });
+                const data = await res.json();
+                alert(data.message);
+                fetchProjects();
+            } catch (e) {
+                alert("Failed to resume project.");
+            }
+        }
+
+        function goToPublish(id, videoUrl, audioUrl, text) {
+            if (typeof CreoVio !== 'undefined') {
+                CreoVio.updateState({ 
+                    currentJobId: id,
+                    videoUrl: videoUrl,
+                    audioUrl: audioUrl,
+                    text: text
+                });
+            }
+            window.location.href = '/youtube';
+        }
+
+        window.addEventListener('DOMContentLoaded', fetchProjects);
+    </script>
+</body>
+</html>

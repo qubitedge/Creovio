@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreoVio AI - Education Video Generator</title>
+    <!-- Google Fonts: Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="/static/landing.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'aqua-dark': '#1D4D4F',
+                        'aqua-base': '#2D6A6D',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-dark {
+            background: rgba(29, 77, 79, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(29, 77, 79, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="w-full px-12 py-6 flex items-center justify-between bg-transparent max-w-7xl mx-auto">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl font-black text-aqua-dark tracking-tight" style="font-family: 'Nunito', sans-serif;">Creo<span class="opacity-60">Vio</span></span>
+        </div>
+        
+        <div class="hidden md:flex items-center gap-8">
+            <a href="/voice" class="text-sm font-semibold text-aqua-dark/70 hover:text-aqua-dark transition-colors">Voice Cloning</a>
+            <a href="/video" class="text-sm font-semibold text-aqua-dark/70 hover:text-aqua-dark transition-colors">Video Gen</a>
+            <a href="/youtube" class="text-sm font-semibold text-aqua-dark/70 hover:text-aqua-dark transition-colors">YouTube Sync</a>
+            <a href="/projects" class="text-sm font-bold text-aqua-dark hover:text-aqua-dark transition-colors">My Projects</a>
+        </div>
+
+        <div class="flex items-center gap-5">
+            <a href="/about.html" class="text-sm font-semibold text-aqua-dark/70 hover:text-aqua-dark transition-colors">About</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>Transform your lectures into immersive AI-powered videos.</h1>
+                <p>Seamlessly convert text to voice, sync with avatars, and publish to YouTube.</p>
+                <div class="hero-actions">
+                    <a href="/dashboard" class="btn-primary btn-large">Start Generating</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="/static/robot.png" alt="CreoVio AI Robot" class="hero-robot">
+            </div>
+        </div>
+    </section>
+
+
+</body>
+</html>

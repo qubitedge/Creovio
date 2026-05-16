@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Studio | CreoVio AI</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --bg-teal: #C1E9E6;
+            --bg-teal-dark: #2D6A6D;
+            --text-dark: #1D4D4F;
+            --glass-white: rgba(255, 255, 255, 0.5);
+            --card-bg: #E8F7F5;
+            --accent-teal: #3AA19B;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+
+        body {
+            background-color: var(--bg-teal);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding-bottom: 4rem;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo { font-size: 1.8rem; font-weight: 900; }
+        .logo span { opacity: 0.5; }
+
+        .btn-back {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 800;
+            background: var(--glass-white);
+            padding: 10px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .studio-grid {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 2rem;
+            align-items: stretch;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 32px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 70, 70, 0.05);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .left-panel-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            height: 100%;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Preview */
+        .preview-box {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #111;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .preview-box video { width: 100%; height: 100%; object-fit: contain; }
+
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.4);
+            border: none;
+            padding: 15px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: var(--accent-teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .btn-full {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.4);
+            border: none;
+            padding: 18px;
+            border-radius: 16px;
+            font-weight: 800;
+            color: var(--accent-teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+
+        .channel-card {
+            background: var(--card-bg);
+            border-radius: 32px;
+            padding: 2.5rem;
+            flex-grow: 1; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .info-alert {
+            background: rgba(255, 255, 255, 0.4);
+            padding: 1.5rem;
+            border-radius: 20px;
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .info-alert p { font-size: 0.95rem; font-weight: 700; opacity: 0.8; }
+
+        .btn-google {
+            background: white;
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: var(--text-dark);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        .btn-google:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+
+        /* Right Panel */
+        .form-group { margin-bottom: 1.5rem; }
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+        .label-row label { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; opacity: 0.7; }
+        .counter { font-size: 0.8rem; font-weight: 700; color: var(--accent-teal); }
+
+        .input-box {
+            width: 100%;
+            background: #2D4F4F;
+            border: none;
+            border-radius: 14px;
+            padding: 1.25rem;
+            color: white;
+            font-weight: 600;
+            font-size: 1.05rem;
+            outline: none;
+            transition: ring 0.3s;
+        }
+        .input-box:focus { ring: 3px solid rgba(58, 161, 155, 0.2); }
+        textarea.input-box { height: 160px; resize: none; line-height: 1.6; }
+
+        .tag-container {
+            background: white;
+            border-radius: 16px;
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            min-height: 100px;
+            align-content: flex-start;
+        }
+        .tag-chip {
+            background: #B4E1DC;
+            padding: 8px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tag-chip i { cursor: pointer; opacity: 0.5; }
+        .tag-input {
+            background: #2D4F4F;
+            color: white;
+            padding: 14px;
+            border-radius: 14px;
+            width: 100%;
+            margin-top: 10px;
+            border: none;
+            outline: none;
+        }
+
+        .select-box {
+            width: 100%;
+            background: #2D4F4F;
+            color: white;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 800;
+            font-size: 1rem;
+            appearance: none;
+        }
+
+        .toggle-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .toggle-btn {
+            background: white;
+            border: 2px solid transparent;
+            padding: 15px;
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0.5;
+        }
+        .toggle-btn.active {
+            opacity: 1;
+            background: #B4E1DC;
+            border-color: var(--accent-teal);
+        }
+        .toggle-btn i { font-size: 1.4rem; }
+        .toggle-btn span { font-size: 0.8rem; font-weight: 800; }
+
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .thumb-btn {
+            aspect-ratio: 16/9;
+            background: white;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: var(--accent-teal);
+            transition: all 0.3s;
+            opacity: 0.6;
+            overflow: hidden;
+            position: relative;
+        }
+        .thumb-btn.active { 
+            opacity: 1;
+            border-color: var(--accent-teal); 
+            background: #B4E1DC; 
+        }
+        .thumb-btn img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+        .btn-publish {
+            width: 100%;
+            background: white;
+            border: none;
+            padding: 22px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: var(--accent-teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            margin-top: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        .btn-publish:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="logo">Creo<span>Vio</span></div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <div id="userNameDisplay" style="font-weight: 800; opacity: 0.6; font-size: 0.95rem;">Pravallika</div>
+                <a href="/dashboard" class="btn-back"><i data-lucide="arrow-left"></i> Back</a>
+            </div>
+        </header>
+
+        <div class="studio-grid">
+            <!-- Left Column -->
+            <div class="left-panel-stack">
+                <div class="card">
+                    <div class="card-title">Final Output</div>
+                    <div class="preview-box">
+                        <video id="finalVideo" controls></video>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-ghost" onclick="alert('Upload functionality ready')"><i data-lucide="upload-cloud"></i> Upload file</button>
+                        <button class="btn-ghost" onclick="alert('Draft Saved!')"><i data-lucide="save"></i> Save draft</button>
+                    </div>
+                    <button class="btn-full" id="downloadMp4"><i data-lucide="download"></i> Download MP4</button>
+                </div>
+
+                <div class="channel-card" id="ytStatusBox">
+                    <div class="card-title">YouTube Channel</div>
+                    <div class="info-alert">
+                        <i data-lucide="info" style="color: var(--accent-teal); width: 24px; flex-shrink: 0;"></i>
+                        <p>Connect your account to publish directly.</p>
+                    </div>
+                    <a href="/login/google" id="signinBtn" class="btn-google">
+                        <img src="https://www.google.com/favicon.ico" style="width: 20px;">
+                        Sign in with Google
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="card">
+                <div class="card-title"><i data-lucide="youtube" style="color: red;"></i> Video metadata</div>
+                
+                <div class="form-group">
+                    <div class="label-row">
+                        <label>Video Title</label>
+                        <span class="counter" id="titleCount">0/100</span>
+                    </div>
+                    <input type="text" id="ytTitle" class="input-box" placeholder="Engaging title here..." maxlength="100">
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label>Description</label>
+                        <span class="counter" id="descCount">0/5000</span>
+                    </div>
+                    <textarea id="ytDesc" class="input-box" placeholder="Tell viewers about your video..." maxlength="5000"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label>Tags</label>
+                    </div>
+                    <div class="tag-container" id="tagList"></div>
+                    <input type="text" id="tagInput" class="tag-input" placeholder="Add tag... Press Enter to add">
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label>Category</label>
+                    </div>
+                    <select class="select-box" id="ytCategory">
+                        <option>Science & Technology</option>
+                        <option>Education</option>
+                        <option>Howto & Style</option>
+                        <option>Entertainment</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label>Visibility</label>
+                    </div>
+                    <div class="toggle-row">
+                        <div class="toggle-btn" id="visUnlisted" onclick="setVisibility('unlisted')">
+                            <i data-lucide="eye-off"></i>
+                            <span>Unlisted</span>
+                        </div>
+                        <div class="toggle-btn active" id="visPublic" onclick="setVisibility('public')">
+                            <i data-lucide="globe"></i>
+                            <span>Public</span>
+                        </div>
+                        <div class="toggle-btn" id="visPrivate" onclick="setVisibility('private')">
+                            <i data-lucide="lock"></i>
+                            <span>Private</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label>Thumbnail</label>
+                    </div>
+                    <div class="thumbnail-grid">
+                        <div class="thumb-btn active" id="thumbAuto1" onclick="setThumbnail('auto1')">Auto 1</div>
+                        <div class="thumb-btn" id="thumbAuto2" onclick="setThumbnail('auto2')">Auto 2</div>
+                        <div class="thumb-btn" id="thumbUpload" onclick="triggerThumbUpload()">
+                            <i data-lucide="image-plus" id="thumbIcon" style="width: 20px; margin-bottom: 4px;"></i>
+                            <img id="thumbPreview" class="hidden">
+                            <span id="thumbLabel">Upload</span>
+                        </div>
+                        <input type="file" id="thumbInput" class="hidden" accept="image/*" onchange="handleThumbUpload(event)">
+                    </div>
+                </div>
+
+                <button class="btn-publish" id="publishBtn">
+                    <i data-lucide="play" style="fill: red; color: red; width: 22px;"></i>
+                    Publish to YouTube
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/creovio.js"></script>
+    <script>
+        lucide.createIcons();
+
+        // Character Counters
+        const titleInput = document.getElementById('ytTitle');
+        const descInput = document.getElementById('ytDesc');
+        
+        titleInput.addEventListener('input', () => {
+            document.getElementById('titleCount').innerText = `${titleInput.value.length}/100`;
+        });
+        descInput.addEventListener('input', () => {
+            document.getElementById('descCount').innerText = `${descInput.value.length}/5000`;
+        });
+
+        // Connection Status Check
+        async function checkYTStatus() {
+            try {
+                const res = await fetch('/yt-status');
+                const data = await res.json();
+                const statusBox = document.getElementById('ytStatusBox');
+                const signinBtn = document.getElementById('signinBtn');
+                
+                if (data.connected && signinBtn) {
+                    statusBox.innerHTML = `
+                        <div class="card-title">YouTube Channel</div>
+                        <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 16px; border-radius: 12px; display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem;">
+                            <div style="width: 10px; height: 10px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e;"></div>
+                            <span style="color: #166534; font-weight: 800; font-size: 0.9rem;">Connected to YouTube</span>
+                        </div>
+                        <p style="font-size: 0.75rem; margin-top: 0.75rem; opacity: 0.5; font-weight: 700;">Account linked: pravallikakundum18@gmail.com</p>
+                    `;
+                }
+            } catch (e) { console.error("YT Status Check Failed", e); }
+        }
+        checkYTStatus();
+        setInterval(checkYTStatus, 5000); 
+
+        // Tags Logic
+        const tagInput = document.getElementById('tagInput');
+        const tagList = document.getElementById('tagList');
+        let tags = ['#AI', '#Education', '#MachineLearning'];
+
+        function renderTags() {
+            tagList.innerHTML = tags.map((t, i) => `
+                <div class="tag-chip">
+                    ${t} <i data-lucide="x" onclick="removeTag(${i})" style="width: 14px;"></i>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        tagInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && tagInput.value.trim()) {
+                let tag = tagInput.value.trim();
+                if (!tag.startsWith('#')) tag = '#' + tag;
+                tags.push(tag);
+                tagInput.value = '';
+                renderTags();
+            }
+        });
+
+        function removeTag(index) {
+            tags.splice(index, 1);
+            renderTags();
+        }
+
+        // Visibility Logic
+        let currentVisibility = 'public';
+        function setVisibility(type) {
+            currentVisibility = type;
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            if (type === 'unlisted') document.getElementById('visUnlisted').classList.add('active');
+            if (type === 'public') document.getElementById('visPublic').classList.add('active');
+            if (type === 'private') document.getElementById('visPrivate').classList.add('active');
+        }
+
+        // Thumbnail Logic
+        let currentThumbnail = 'auto1';
+        function setThumbnail(type) {
+            currentThumbnail = type;
+            document.querySelectorAll('.thumb-btn').forEach(btn => btn.classList.remove('active'));
+            if (type === 'auto1') document.getElementById('thumbAuto1').classList.add('active');
+            if (type === 'auto2') document.getElementById('thumbAuto2').classList.add('active');
+        }
+
+        function triggerThumbUpload() {
+            document.getElementById('thumbInput').click();
+        }
+
+        async function handleThumbUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/upload-thumbnail', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                const preview = document.getElementById('thumbPreview');
+                preview.src = data.thumbnail_url;
+                preview.classList.remove('hidden');
+                document.getElementById('thumbIcon').classList.add('hidden');
+                document.getElementById('thumbLabel').classList.add('hidden');
+                setThumbnail('upload');
+            } catch (e) {
+                alert("Thumbnail upload failed.");
+            }
+        }
+
+        // Publish Logic
+        document.getElementById('publishBtn').addEventListener('click', async () => {
+            const jobId = CreoVio.state.currentJobId;
+            if (!jobId) {
+                alert("Please select a project from your Library first.");
+                window.location.href = '/projects';
+                return;
+            }
+            
+            const btn = document.getElementById('publishBtn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<div style="width:20px; height:20px; border:2px solid red; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div> Publishing...';
+            
+            try {
+                const res = await fetch('/upload-youtube', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        job_id: CreoVio.state.currentJobId,
+                        title: titleInput.value,
+                        description: descInput.value,
+                        visibility: currentVisibility,
+                        category: document.getElementById('ytCategory').value,
+                        tags: tags.join(',')
+                    })
+                });
+                
+                if (res.ok) {
+                    btn.innerHTML = '<i data-lucide="check-circle" style="color: green; width: 22px;"></i> Successfully Published!';
+                    setTimeout(() => { btn.innerHTML = originalHtml; lucide.createIcons(); }, 5000);
+                } else {
+                    const data = await res.json();
+                    alert("Error: " + (data.detail || "Connection failed. Ensure client_secrets.json is configured on server."));
+                    btn.innerHTML = originalHtml;
+                }
+            } catch (e) {
+                alert("Network error.");
+                btn.innerHTML = originalHtml;
+            }
+            lucide.createIcons();
+        });
+
+        // Init State
+        window.addEventListener('DOMContentLoaded', () => {
+            renderTags();
+            if (typeof CreoVio !== 'undefined' && CreoVio.state) {
+                const videoEl = document.getElementById('finalVideo');
+                const previewBox = document.querySelector('.preview-box');
+
+                if (CreoVio.state.videoUrl) {
+                    videoEl.src = CreoVio.state.videoUrl;
+                } else if (CreoVio.state.audioUrl) {
+                    // Show a placeholder for audio-only projects
+                    previewBox.innerHTML = `
+                        <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#1a4040; color:white; padding:20px; text-align:center;">
+                            <i data-lucide="mic" style="width:48px; height:48px; margin-bottom:1rem; color:var(--accent-teal);"></i>
+                            <div style="font-weight:900; margin-bottom:0.5rem;">Audio Project</div>
+                            <audio src="${CreoVio.state.audioUrl}" controls style="width:80%; height:40px;"></audio>
+                            <p style="font-size:0.7rem; opacity:0.6; margin-top:1rem;">YouTube requires a video. Convert this to a video in the Library before publishing.</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+
+                if (CreoVio.state.text) {
+                    titleInput.value = "AI Tutorial: " + CreoVio.state.text.substring(0, 60) + "...";
+                    descInput.value = CreoVio.state.text;
+                    titleInput.dispatchEvent(new Event('input'));
+                    descInput.dispatchEvent(new Event('input'));
+                }
+                const nameDisplay = document.getElementById('userNameDisplay');
+                if (nameDisplay && CreoVio.state.user) nameDisplay.innerText = CreoVio.state.user.name;
+
+                // Fix Download Button
+                const downloadBtn = document.getElementById('downloadMp4');
+                if (downloadBtn) {
+                    downloadBtn.onclick = () => {
+                        if (CreoVio.state.videoUrl) {
+                            const a = document.createElement('a');
+                            a.href = CreoVio.state.videoUrl;
+                            a.download = `eduvid_export_${Date.now()}.mp4`;
+                            a.click();
+                        } else {
+                            alert("No video file found to download.");
+                        }
+                    };
+                }
+            }
+        });
+
+        const style = document.createElement('style');
+        style.textContent = '@keyframes spin { to { transform: rotate(360deg); } } .hidden { display: none; }';
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
