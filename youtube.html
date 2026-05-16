@@ -355,10 +355,13 @@
                         <i data-lucide="info" style="color: var(--accent-teal); width: 24px; flex-shrink: 0;"></i>
                         <p>Connect your account to publish directly.</p>
                     </div>
-                    <a href="/login/google" id="signinBtn" class="btn-google">
+                    <a href="#" id="signinBtn" class="btn-google">
                         <img src="https://www.google.com/favicon.ico" style="width: 20px;">
                         Sign in with Google
                     </a>
+                    <script>
+                        document.getElementById('signinBtn').href = window.API_URL + '/login/google';
+                    </script>
                 </div>
             </div>
 
