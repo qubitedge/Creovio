@@ -1,0 +1,12 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/video", "destination": "/video.html" },
+    { "source": "/voice", "destination": "/voice.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/projects", "destination": "/projects.html" },
+    { "source": "/youtube", "destination": "/youtube.html" },
+    { "source": "/profile", "destination": "/profile.html" },
+    { "source": "/app", "destination": "/app.html" }
+  ]
+}
